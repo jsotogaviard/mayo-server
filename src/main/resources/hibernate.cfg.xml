@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+ 
+<hibernate-configuration>
+    <session-factory>
+             <!-- Database connection settings -->
+        <property name="connection.driver_class">org.h2.Driver</property>
+        <property name="connection.url">jdbc:h2:file:sentinel;DB_CLOSE_DELAY=-1;MVCC=TRUE</property>
+        <property name="connection.username">root</property>
+        <property name="connection.password"/>
+
+        <!-- JDBC connection pool (use the built-in) -->
+        <property name="connection.pool_size">1</property>
+
+        <!-- SQL dialect -->
+        <property name="dialect">org.hibernate.dialect.H2Dialect</property>
+
+        <!-- Disable the second-level cache  -->
+        <property name="cache.provider_class">org.hibernate.cache.NoCacheProvider</property>
+
+        <!-- Echo all executed SQL to stdout -->
+        <property name="show_sql">false</property>
+
+        <!-- What to do with the DB schema on startup -->
+        <property name="hbm2ddl.auto">create-drop</property>
+
+		<!-- Session management -->
+		<property name="hibernate.transaction.factory_class">org.hibernate.transaction.JDBCTransactionFactory</property>
+		<property name="hibernate.current_session_context_class">thread</property>
+ 
+ 		<mapping class="com.mayo.database.hibernate.Connections"/>
+ 		<mapping class="com.mayo.database.hibernate.EmailsConnections"/>
+ 		<mapping class="com.mayo.database.hibernate.PhonesConnections"/>
+ 		<mapping class="com.mayo.database.hibernate.Users"/>
+ 		<mapping class="com.mayo.database.hibernate.EmailsUsers"/>
+ 		<mapping class="com.mayo.database.hibernate.PhonesUsers"/>
+ 		<mapping class="com.mayo.database.hibernate.Links"/>
+ 		
+ 		 
+    </session-factory>
+</hibernate-configuration>
