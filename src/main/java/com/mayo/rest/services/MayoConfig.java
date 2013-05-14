@@ -15,10 +15,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Import;
 
+import com.mayo.IMayoService;
 import com.mayo.IUserMatcher;
+import com.mayo.mail.AMail;
 import com.mayo.mail.EmailDispatcherThread;
 import com.mayo.mail.MailSession;
-import com.mayo.mail.AMail;
 //@PropertySource(value="classpath:tcph.properties")
 @Configuration
 @Import(value={
@@ -48,7 +49,7 @@ public class MayoConfig {
     @DependsOn(value="emailQueue")
     @Bean()
    	public Void emailDispatcher() {
-    	boolean test = Boolean.parseBoolean(System.getProperty(MayoService.TEST_ENV, "false"));
+    	boolean test = Boolean.parseBoolean(System.getProperty(IMayoService.TEST_ENV, "false"));
     	Session session ;
 		if (test) {
 			// It is a test
@@ -57,6 +58,7 @@ public class MayoConfig {
 			// It is a test
 			session =  MailSession.createGmailSession();
 		}
+		
        	Thread t = new EmailDispatcherThread(session, emailQueue());
        	t.start();
        	return null;

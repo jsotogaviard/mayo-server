@@ -12,7 +12,6 @@ import static com.mayo.IMayoService.PHONES;
 import static com.mayo.IMayoService.PHONES_CONNECTIONS_CLASS;
 import static com.mayo.IMayoService.PHONES_USERS_CLASS;
 import static com.mayo.IMayoService.USERS_CLASS;
-import static com.mayo.IMayoService.USER_ID;
 import static com.mayo.database.hibernate.HibernateUtil.delete;
 import static com.mayo.database.hibernate.HibernateUtil.list;
 
@@ -29,15 +28,14 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.eclipse.jetty.server.Server;
 import org.json.simple.JSONArray;
 import org.junit.After;
-import org.junit.Before;
+import org.junit.BeforeClass;
 
 import com.dumbster.smtp.SimpleSmtpServer;
 import com.dumbster.smtp.SmtpMessage;
 import com.mayo.IMayoService;
+import com.mayo.MayoException;
 import com.mayo.jettyserver.MayoServer;
-import com.mayo.mail.MailSession;
 import com.mayo.mail.AMail;
-import com.mayo.rest.services.MayoService;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
@@ -83,18 +81,28 @@ public class AServiceTests{
 		LINKS_CLASS,
 	};
 	
+	public static String email = "jso@qfs.com";
+	public static String password = "secret";
+	public static String phone = "050505050";
+
+	public static String email1 = "jso1@qfs.com";
+	public static String password1 = "secret1";
+	public static String phone1 = "05060606";
+	
 	/** The mayo server  */
-	public Server server;
+	public static Server server;
 
 	/** The client */
-	public Client client;
+	public static Client client;
 	
 	public ObjectMapper mapper = new ObjectMapper();
 	
-	public SimpleSmtpServer mailServer ;
+	public static SimpleSmtpServer mailServer ;
 
-	@Before
-	public void setUpServer() throws Exception {
+	@BeforeClass
+	public static void setUpServer() throws Exception {
+		System.setProperty(IMayoService.TEST_ENV, "true");
+		
 		// Start the server
 		server = MayoServer.createServer(PORT);
 		server.start();		
@@ -103,9 +111,7 @@ public class AServiceTests{
 		client = Client.create();
 		
 		// The mail server
-		mailServer = SimpleSmtpServer.start(Integer.parseInt(MailSession.MAIL_PORT));
-		
-		System.setProperty(MayoService.TEST_ENV, "true");
+		mailServer = SimpleSmtpServer.start(Integer.parseInt(IMayoService.FAKE_MAIL_PORT));
 	}
 
 	@After
@@ -122,10 +128,9 @@ public class AServiceTests{
 	public void validateSentEmail(List<AMail> sentEmails) {
 		mailServer.stop();
 		
-		Assert.assertEquals(mailServer.getReceivedEmailSize() , sentEmails.size());
+		Assert.assertEquals(sentEmails.size(), mailServer.getReceivedEmailSize());
 		Iterator<?> emailIter = mailServer.getReceivedEmail();
 		for (int i = 0; i < sentEmails.size(); i++) {
-			
 			SmtpMessage email = (SmtpMessage)emailIter.next();
 			AMail sentEmail = new AMail(email.getHeaderValue("To"),email.getHeaderValue("Subject"));
 			Assert.assertEquals(sentEmail,sentEmails.get(i));
@@ -142,10 +147,8 @@ public class AServiceTests{
 		WebResource webResource = client.resource("http://localhost:9090/rest/mayo/registerUser");
 		ClientResponse response = webResource.type(MediaType.APPLICATION_FORM_URLENCODED).post(ClientResponse.class, f);
 
-		if (response.getStatus() != 200) {
-			throw new RuntimeException("Failed : HTTP error code : "
-					+ response.getStatus());
-		}
+		if (response.getStatus() != 200) 
+			throw new MayoException("Failed : HTTP error code : " + response.getStatus());
 	}
 	
 	public String login(String mainEmail, String pwd){
@@ -163,23 +166,22 @@ public class AServiceTests{
 				token = cookie.getValue();
 			}
 		}
-		if (response.getStatus() != 200 && token != null) {
-			throw new RuntimeException("Failed : HTTP error code : "
-					+ response.getStatus());
-		}
+		if (response.getStatus() != 200) 
+			throw new MayoException("Failed : HTTP error code : "+ response.getStatus());
+		
+		if (token == null) 
+			throw new MayoException("Token cannot be null");
+
 		return token;
 	}
 	
 	protected void validateUser(Long userId, String mainEmail) {
-		WebResource webResource = client.resource("http://localhost:9090/rest/mayo/verifyEmail/" + userId + 
-				"?mainEmail=" + mainEmail);
+		WebResource webResource = client.resource("http://localhost:9090/rest/mayo/verifyEmail/" + userId +	"?mainEmail=" + mainEmail);
 		ClientResponse response = webResource.type(MediaType.APPLICATION_FORM_URLENCODED).get(ClientResponse.class);
 
-		if (response.getStatus() != 200) {
-			throw new RuntimeException("Failed : HTTP error code : "
-					+ response.getStatus());
-		}
-
+		if (response.getStatus() != 200) 
+			throw new RuntimeException("Failed : HTTP error code : " + response.getStatus());
+		
 	}
 	
 	public <T> void validateDatabase(T clazz, List<T> expected){
@@ -190,10 +192,21 @@ public class AServiceTests{
 		}
 	}
 	
+	/**
+	 * @param i
+	 */
+	protected void waitSomeTime(int i) {
+		try {
+			Thread.sleep(3000L);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
+	
 	@SuppressWarnings("unchecked")
-	public void addUserConnection(long userId, String name, String[] phonesUser, String[] emailsUser, String token){
+	public void addUserConnection(String name, String[] phonesUser, String[] emailsUser, String token){
 		Form f = new Form();
-		f.add(USER_ID, userId);
 		f.add(NAME, name);
 		JSONArray phones = new JSONArray();
 		phones.addAll(Arrays.asList(phonesUser));

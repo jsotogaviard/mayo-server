@@ -22,11 +22,6 @@ import com.mayo.IMayoService;
 @Table(name=IMayoService.CONNECTIONS)
 public class Connections {
 	
-	@Override
-	public String toString() {
-		return "Connections [id=" + this.id + ", name=" + this.name + "]";
-	}
-
 	@Id
 	@GeneratedValue
 	protected Long id;
@@ -34,50 +29,17 @@ public class Connections {
 	@Column(name="name")
 	protected String name;
 	
-	/** Constructor
-	 * @param id
-	 * @param name
-	 * @param password
-	 * @param connectionsId
-	 */
 	public Connections(String name) {
 		this.name = name;
 	}
 	
-	/** Constructor
-	 * 
-	 */
-	public Connections() {}
-
-	/**
-	 * @return The id
-	 */
-	public Long getId() {
-		return this.id;
-	}
-
-	/**
-	 * Sets the id
-	 * @param id The id to set
-	 */
-	public void setId(Long id) {
+	public Connections(Long id, String name) {
+		super();
 		this.id = id;
-	}
-
-	/**
-	 * @return The name
-	 */
-	public String getName() {
-		return this.name;
-	}
-
-	/**
-	 * Sets the name
-	 * @param name The name to set
-	 */
-	public void setName(String name) {
 		this.name = name;
 	}
+
+	public Connections() {}
 
 	@Override
 	public int hashCode() {
@@ -111,6 +73,9 @@ public class Connections {
 		return true;
 	}
 
-	
+	@Override
+	public String toString() {
+		return "Connections [id=" + this.id + ", name=" + this.name + "]";
+	}
 
 }

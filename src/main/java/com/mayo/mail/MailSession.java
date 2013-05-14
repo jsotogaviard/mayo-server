@@ -5,14 +5,14 @@ import java.util.Properties;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 
+import com.mayo.IMayoService;
+
 public class MailSession {
 	
-	public static final String MAIL_PORT = "2567";
-
 	public static Session createFakeSession() {
 		Properties props = new Properties();
 		props.put("mail.smtp.host", "localhost");
-		props.put("mail.smtp.port", MAIL_PORT);
+		props.put("mail.smtp.port", IMayoService.FAKE_MAIL_PORT);
 		return Session.getDefaultInstance(props);
 
 	}
@@ -25,6 +25,7 @@ public class MailSession {
 		props.put("mail.smtp.auth", "true");
 		props.put("mail.smtp.starttls.enable", "true");
 		return Session.getDefaultInstance(props, new javax.mail.Authenticator() {
+			@Override
 			protected PasswordAuthentication getPasswordAuthentication() {
 				return new PasswordAuthentication(from, "mayo2013");
 			}

@@ -75,6 +75,11 @@ public interface IMayoService {
 
 	public static final String MAYO_AUTH_TOKEN = "MAYO_AUTH_TOKEN";
 	
+	public static final String FAKE_MAIL_PORT = "2567";
+
+	/** TODO better method for test environment */
+	public static final String TEST_ENV = "TestEnvironment";
+	
 	
 
 	/**

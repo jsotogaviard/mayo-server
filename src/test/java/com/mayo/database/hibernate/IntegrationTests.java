@@ -1,8 +1,13 @@
 package com.mayo.database.hibernate;
 
+import java.util.Arrays;
 import java.util.Iterator;
 
 import org.junit.Test;
+
+import com.mayo.mail.AMail;
+import com.mayo.mail.ConnectionEmail;
+import com.mayo.mail.VerificationMail;
 
 public class IntegrationTests extends AServiceTests {
 
@@ -10,26 +15,24 @@ public class IntegrationTests extends AServiceTests {
 	public void testBasicScenario() {
 		
 		// Jonathan adds rita
-		addUser("jso@qfs.com", "jonathan", "soto", new String[]{"050505050"}, new String[]{"jso1@qfs.com"});
-		HibernateUtil.update(new Users(1L, "jonathan", "jso@qfs.com" ,"soto", true));
-		String tokenSoto = login("jso@qfs.com", "soto");
-		addUserConnection(1L, "rita", new String[]{"060606060"}, new String[]{}, tokenSoto);
+		addUser(email, password);
+		HibernateUtil.update(new Users(1L, email, password, true));
+		String tokenSoto = login(email, password);
+		addUserConnection("rita", new String[]{phone1}, new String[]{}, tokenSoto);
 
 		// Rita adds Jonathan
-		addUser("rita@qfs.com", "rita", "maga", new String[]{"060606060"}, new String[]{});
-		HibernateUtil.update(new Users(2L, "rita", "rita@qfs.com" ,"maga", true));
-		String tokenRita = login("rita@qfs.com", "maga");
-		addUserConnection(2L, "jon", new String[]{"050505050"}, new String[]{}, tokenRita);
+		addUser(email1, password1);
+		HibernateUtil.update(new Users(2L, email1, password1, true));
+		String tokenRita = login(email1, password1);
+		addUserConnection("jon", new String[]{phone}, new String[]{}, tokenRita);
 		
 		// Verify emails send
 		mailServer.stop();
-		System.out.println(mailServer.getReceivedEmailSize());
-		@SuppressWarnings("unchecked")
-		Iterator<Object> it = mailServer.getReceivedEmail();
-		while(it.hasNext()){
-			Object mail = it.next();
-			System.out.println(mail);
-		}
+		validateSentEmail(Arrays.<AMail>asList(new VerificationMail(email),
+				new VerificationMail(email1),
+				new ConnectionEmail(email),
+				new ConnectionEmail(email1)
+		));
 	}
 	
 	@Test

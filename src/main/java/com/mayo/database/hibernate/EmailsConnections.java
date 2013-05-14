@@ -31,47 +31,12 @@ public class EmailsConnections {
 	@Column(name=EMAIL)
 	protected String email;
 
-	/** Constructor
-	 * @param id
-	 * @param email
-	 */
 	public EmailsConnections(Long id, String email) {
-		super();
 		this.id = id;
 		this.email = email;
 	}
 
 	public EmailsConnections() {}
-
-	/**
-	 * @return The id
-	 */
-	public Long getId() {
-		return this.id;
-	}
-
-	/**
-	 * Sets the id
-	 * @param id The id to set
-	 */
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	/**
-	 * @return The email
-	 */
-	public String getEmail() {
-		return this.email;
-	}
-
-	/**
-	 * Sets the email
-	 * @param email The email to set
-	 */
-	public void setEmail(String email) {
-		this.email = email;
-	}
 
 	@Override
 	public String toString() {
@@ -109,6 +74,13 @@ public class EmailsConnections {
 		} else if (!this.id.equals(other.id))
 			return false;
 		return true;
+	}
+
+	/**
+	 * @return
+	 */
+	public Long getId() {
+		return this.id;
 	}
 	
 	

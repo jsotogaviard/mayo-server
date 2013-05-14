@@ -1,5 +1,6 @@
 package com.mayo.database.hibernate;
 
+import static com.mayo.IMayoService.EMAILS_USERS_CLASS;
 import static com.mayo.IMayoService.USERS_CLASS;
 
 import java.util.Arrays;
@@ -13,54 +14,31 @@ import com.mayo.mail.AMail;
 import com.mayo.mail.VerificationMail;
 
 public class RegistrationTest extends AServiceTests {
-
-	@Test
-	public void testUserRegistration() {
-		addUser("jso@qfs.com", "secret");
-		validateDatabase(USERS_CLASS, Arrays.asList(new Users(1L, "jso@qfs.com" ,"secret", false)));
-		//validateDatabase(EMAILS_USERS_CLASS, Arrays.asList(new EmailsUsers(1L, "jso@qfs.com"), new EmailsUsers(1L, "jso1@qfs.com")));
-		try {
-			Thread.sleep(1000L);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		
-		validateSentEmail(Collections.singletonList(new AMail("jso@qfs.com", VerificationMail.SUBJECT)));
-	
-		validateUser(1L, "jso@qfs.com");
-		validateDatabase(USERS_CLASS, Arrays.asList(new Users(1L, "jso@qfs.com" ,"secret", true)));
-	}
 	
 	@Test
-	public void testUserAlreadyRegistered() {
-		printAll();
-		addUser("jso@qfs.com", "secret");
-		validateDatabase(USERS_CLASS, Arrays.asList(new Users(1L, "jso@qfs.com" ,"secret", false)));
-		validateSentEmail(Collections.singletonList(new AMail("jso@qfs.com", VerificationMail.SUBJECT)));
-	
-		validateUser(1L, "jso@qfs.com");
-		validateDatabase(USERS_CLASS, Arrays.asList(new Users(1L, "jso@qfs.com" ,"soto", true)));
+	public void uniqueTest() {
+		addUser(email, password);
+		validateDatabase(USERS_CLASS, Arrays.asList(new Users(1L, email ,password, false)));
+		validateDatabase(EMAILS_USERS_CLASS, Arrays.asList(new EmailsUsers(1L, email)));
 		
+		// Wait for the mails to arrive
+		waitSomeTime(3000);
+		
+		validateSentEmail(Collections.<AMail>singletonList(new VerificationMail(email)));
+	
+		validateUser(1L, email);
+		validateDatabase(USERS_CLASS, Arrays.asList(new Users(1L, email ,password, true)));
+		
+		// Adding user already registered
 		try {
-			addUser("jso@qfs.com", "secret");
+			addUser(email, password);
 			Assert.fail();
 		} catch (Exception ex) {}
 		
-	}
-	
-	@Test
-	public void testAlreadyVerified() {
-		addUser("jso@qfs.com", "secret");
-		validateDatabase(USERS_CLASS, Arrays.asList(new Users(1L,"jso@qfs.com" ,"secret", false)));
-		validateSentEmail(Collections.singletonList(new AMail("jso@qfs.com", VerificationMail.SUBJECT)));
-	
-		validateUser(1L, "jso@qfs.com");
-		validateDatabase(USERS_CLASS, Arrays.asList(new Users(1L, "jso@qfs.com" ,"secret", true)));
-		
 		// Already verified
-		validateUser(1L, "jso@qfs.com");
+		// Must not throw
+		validateUser(1L, email);
+		
 	}
 	
-	
-
 }

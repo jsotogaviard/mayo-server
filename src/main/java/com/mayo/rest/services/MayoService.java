@@ -41,7 +41,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
 
-import javax.management.RuntimeErrorException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -81,9 +80,6 @@ public class MayoService{
 
 	/** Global logger */
 	public static final Logger LOGGER = Logger.getLogger(MayoService.class.getName());
-
-	/** TODO better method for test environment */
-	public static final String TEST_ENV = "TestEnvironment";
 
 	/** To handler json types*/
 	public static final ObjectMapper mapper = new ObjectMapper();
@@ -144,7 +140,7 @@ public class MayoService{
 			servletResponse.addCookie(new Cookie(MAYO_AUTH_TOKEN, token));
 			return "ok";
 		} else {
-			throw new RuntimeErrorException(null,"User is not verified");
+			throw new MayoException("User is not verified");
 		}
 	}
 	

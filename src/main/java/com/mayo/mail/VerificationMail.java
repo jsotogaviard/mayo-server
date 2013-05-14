@@ -14,4 +14,11 @@ public class VerificationMail extends AMail{
 				
 	}
 
+	/** Constructor
+	 * 
+	 */
+	public VerificationMail(String to) {
+		super(to, SUBJECT);
+	}
+
 }

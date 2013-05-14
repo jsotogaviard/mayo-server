@@ -28,51 +28,18 @@ public class PhonesConnections {
 	@Column(name="phone")
 	protected String phone;
 	
-
-	/** Constructor
-	 * @param id
-	 * @param phone
-	 */
 	public PhonesConnections(Long id, String phone) {
-		super();
 		this.id = id;
 		this.phone = phone;
 	}
 	
-	/** Constructor
-	 * 
-	 */
-	public PhonesConnections() {
-	}
+	public PhonesConnections() {}
 
 	/**
 	 * @return The id
 	 */
 	public Long getId() {
 		return this.id;
-	}
-
-	/**
-	 * Sets the id
-	 * @param id The id to set
-	 */
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	/**
-	 * @return The phone
-	 */
-	public String getPhone() {
-		return this.phone;
-	}
-
-	/**
-	 * Sets the phone
-	 * @param phone The phone to set
-	 */
-	public void setPhone(String phone) {
-		this.phone = phone;
 	}
 
 	@Override
@@ -113,6 +80,5 @@ public class PhonesConnections {
 		return true;
 	}
 
-	
 
 }

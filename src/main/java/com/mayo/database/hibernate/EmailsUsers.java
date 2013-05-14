@@ -51,51 +51,6 @@ public class EmailsUsers {
 	
 	public EmailsUsers() {}
 
-	/**
-	 * @return The mainEmail
-	 */
-	public String getMainEmail() {
-		return this.mainEmail;
-	}
-
-	/**
-	 * Sets the mainEmail
-	 * @param mainEmail The mainEmail to set
-	 */
-	public void setMainEmail(String mainEmail) {
-		this.mainEmail = mainEmail;
-	}
-	
-	/**
-	 * @return The id
-	 */
-	public Long getId() {
-		return this.id;
-	}
-
-	/**
-	 * Sets the id
-	 * @param id The id to set
-	 */
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	/**
-	 * @return The email
-	 */
-	public String getEmail() {
-		return this.email;
-	}
-
-	/**
-	 * Sets the email
-	 * @param email The email to set
-	 */
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
 	@Override
 	public String toString() {
 		return "EmailsUsers [id=" + this.id + ", email=" + this.email + "]";
@@ -131,6 +86,13 @@ public class EmailsUsers {
 		} else if (!this.id.equals(other.id))
 			return false;
 		return true;
+	}
+
+	/**
+	 * @return
+	 */
+	public Long getId() {
+		return this.id;
 	}
 	
 	

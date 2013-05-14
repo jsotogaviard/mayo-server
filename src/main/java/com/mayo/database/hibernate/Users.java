@@ -57,7 +57,8 @@ public class Users {
 	
 	public Users() {}
 	
-	public Users(Long id, String mainEmail, String password, boolean verified){
+	/** Used for tests */
+	public Users(long id, String mainEmail, String password, boolean verified){
 		this.id = id;
 		this.mainEmail = mainEmail;
 		this.password = password;
@@ -77,49 +78,12 @@ public class Users {
 		this.verified = false ;
 	}
 	
-	/**
-	 * @return The mainEmail
-	 */
-	public String getMainEmail() {
-		return this.mainEmail;
-	}
-
-	/**
-	 * Sets the mainEmail
-	 * @param mainEmail The mainEmail to set
-	 */
-	public void setMainEmail(String mainEmail) {
-		this.mainEmail = mainEmail;
-	}
-
-	/**
-	 * @return The id
-	 */
 	public Long getId() {
 		return this.id;
 	}
-
-	/**
-	 * Sets the id
-	 * @param id The id to set
-	 */
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	/**
-	 * @return The password
-	 */
-	public String getPassword() {
-		return this.password;
-	}
-
-	/**
-	 * Sets the password
-	 * @param password The password to set
-	 */
-	public void setPassword(String password) {
-		this.password = password;
+	
+	public String getMainEmail() {
+		return this.mainEmail;
 	}
 
 	public boolean isVerified() {
@@ -135,17 +99,19 @@ public class Users {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result
-				+ ((birthDate == null) ? 0 : birthDate.hashCode());
+				+ ((this.birthDate == null) ? 0 : this.birthDate.hashCode());
 		result = prime * result
-				+ ((firstName == null) ? 0 : firstName.hashCode());
+				+ ((this.firstName == null) ? 0 : this.firstName.hashCode());
+		result = prime * result + ((this.id == null) ? 0 : this.id.hashCode());
 		result = prime * result
-				+ ((lastName == null) ? 0 : lastName.hashCode());
+				+ ((this.lastName == null) ? 0 : this.lastName.hashCode());
 		result = prime * result
-				+ ((mainEmail == null) ? 0 : mainEmail.hashCode());
+				+ ((this.mainEmail == null) ? 0 : this.mainEmail.hashCode());
 		result = prime * result
-				+ ((password == null) ? 0 : password.hashCode());
-		result = prime * result + ((sex == null) ? 0 : sex.hashCode());
-		result = prime * result + (verified ? 1231 : 1237);
+				+ ((this.password == null) ? 0 : this.password.hashCode());
+		result = prime * result
+				+ ((this.sex == null) ? 0 : this.sex.hashCode());
+		result = prime * result + (this.verified ? 1231 : 1237);
 		return result;
 	}
 
@@ -158,39 +124,45 @@ public class Users {
 		if (getClass() != obj.getClass())
 			return false;
 		Users other = (Users) obj;
-		if (birthDate == null) {
+		if (this.birthDate == null) {
 			if (other.birthDate != null)
 				return false;
-		} else if (!birthDate.equals(other.birthDate))
+		} else if (!this.birthDate.equals(other.birthDate))
 			return false;
-		if (firstName == null) {
+		if (this.firstName == null) {
 			if (other.firstName != null)
 				return false;
-		} else if (!firstName.equals(other.firstName))
+		} else if (!this.firstName.equals(other.firstName))
 			return false;
-		if (lastName == null) {
+		if (this.id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!this.id.equals(other.id))
+			return false;
+		if (this.lastName == null) {
 			if (other.lastName != null)
 				return false;
-		} else if (!lastName.equals(other.lastName))
+		} else if (!this.lastName.equals(other.lastName))
 			return false;
-		if (mainEmail == null) {
+		if (this.mainEmail == null) {
 			if (other.mainEmail != null)
 				return false;
-		} else if (!mainEmail.equals(other.mainEmail))
+		} else if (!this.mainEmail.equals(other.mainEmail))
 			return false;
-		if (password == null) {
+		if (this.password == null) {
 			if (other.password != null)
 				return false;
-		} else if (!password.equals(other.password))
+		} else if (!this.password.equals(other.password))
 			return false;
-		if (sex == null) {
+		if (this.sex == null) {
 			if (other.sex != null)
 				return false;
-		} else if (!sex.equals(other.sex))
+		} else if (!this.sex.equals(other.sex))
 			return false;
-		if (verified != other.verified)
+		if (this.verified != other.verified)
 			return false;
 		return true;
 	}
 
+	
 }

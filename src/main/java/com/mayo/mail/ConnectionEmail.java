@@ -9,5 +9,10 @@ public class ConnectionEmail extends AMail{
 				SUBJECT,
 				user2.getMainEmail()  + " is interested by you ");
 	}
+	
+	/** For tests */
+	public ConnectionEmail(String email) {
+		super(email,
+				SUBJECT);	}
 
 }
