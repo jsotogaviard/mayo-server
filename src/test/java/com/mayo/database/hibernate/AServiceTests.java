@@ -1,17 +1,10 @@
 package com.mayo.database.hibernate;
 
-import static com.mayo.IMayoService.CONNECTIONS_CLASS;
 import static com.mayo.IMayoService.EMAILS;
-import static com.mayo.IMayoService.EMAILS_CONNECTIONS_CLASS;
-import static com.mayo.IMayoService.EMAILS_USERS_CLASS;
-import static com.mayo.IMayoService.LINKS_CLASS;
 import static com.mayo.IMayoService.MAIN_EMAIL;
 import static com.mayo.IMayoService.NAME;
 import static com.mayo.IMayoService.PASSWORD;
 import static com.mayo.IMayoService.PHONES;
-import static com.mayo.IMayoService.PHONES_CONNECTIONS_CLASS;
-import static com.mayo.IMayoService.PHONES_USERS_CLASS;
-import static com.mayo.IMayoService.USERS_CLASS;
 import static com.mayo.database.hibernate.HibernateUtil.delete;
 import static com.mayo.database.hibernate.HibernateUtil.list;
 
@@ -27,7 +20,7 @@ import junit.framework.Assert;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.eclipse.jetty.server.Server;
 import org.json.simple.JSONArray;
-import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 import com.dumbster.smtp.SimpleSmtpServer;
@@ -69,18 +62,6 @@ public class AServiceTests{
 	/** The port we are connected to  */
 	public static final int PORT = 9090;
 	
-	public static final Object[] DATABASES = new Object[]{
-		USERS_CLASS,
-		EMAILS_USERS_CLASS,
-		PHONES_USERS_CLASS,
-		
-		CONNECTIONS_CLASS,
-		EMAILS_CONNECTIONS_CLASS,
-		PHONES_CONNECTIONS_CLASS,
-		
-		LINKS_CLASS,
-	};
-	
 	public static String email = "jso@qfs.com";
 	public static String password = "secret";
 	public static String phone = "050505050";
@@ -114,8 +95,8 @@ public class AServiceTests{
 		mailServer = SimpleSmtpServer.start(Integer.parseInt(IMayoService.FAKE_MAIL_PORT));
 	}
 
-	@After
-    public void afterServer() throws Exception {
+	@AfterClass
+    public static void afterServer() throws Exception {
     	server.stop();
     	server.join();
     	deleteAll();
@@ -139,7 +120,7 @@ public class AServiceTests{
 
 	}
 	
-	public void addUser(String mainEmail,String pwd){
+	public long addUser(String mainEmail,String pwd){
 		Form f = new Form();
 		f.add(MAIN_EMAIL, mainEmail);
 		f.add(PASSWORD, pwd);
@@ -149,6 +130,8 @@ public class AServiceTests{
 
 		if (response.getStatus() != 200) 
 			throw new MayoException("Failed : HTTP error code : " + response.getStatus());
+		String textResponse = (response.getEntity(String.class));
+		return Long.parseLong(textResponse);
 	}
 	
 	public String login(String mainEmail, String pwd){
@@ -166,7 +149,7 @@ public class AServiceTests{
 				token = cookie.getValue();
 			}
 		}
-		if (response.getStatus() != 200) 
+		if (response.getStatus() != 204) 
 			throw new MayoException("Failed : HTTP error code : "+ response.getStatus());
 		
 		if (token == null) 
@@ -180,7 +163,7 @@ public class AServiceTests{
 		ClientResponse response = webResource.type(MediaType.APPLICATION_FORM_URLENCODED).get(ClientResponse.class);
 
 		if (response.getStatus() != 200) 
-			throw new RuntimeException("Failed : HTTP error code : " + response.getStatus());
+			throw new MayoException("Failed : HTTP error code : " + response.getStatus());
 		
 	}
 	
@@ -192,20 +175,16 @@ public class AServiceTests{
 		}
 	}
 	
-	/**
-	 * @param i
-	 */
-	protected void waitSomeTime(int i) {
+	protected void waitSomeTime(int time) {
 		try {
-			Thread.sleep(3000L);
+			Thread.sleep(time);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 	}
 
-	
 	@SuppressWarnings("unchecked")
-	public void addUserConnection(String name, String[] phonesUser, String[] emailsUser, String token){
+	public long addUserConnection(String name, String[] phonesUser, String[] emailsUser, String token){
 		Form f = new Form();
 		f.add(NAME, name);
 		JSONArray phones = new JSONArray();
@@ -220,23 +199,41 @@ public class AServiceTests{
 			builder = builder.cookie(new NewCookie(IMayoService.MAYO_AUTH_TOKEN, token));
 		ClientResponse response = builder.type(MediaType.APPLICATION_FORM_URLENCODED).post(ClientResponse.class, f);
 
-		if (response.getStatus() != 200) {
-			throw new RuntimeException("Failed : HTTP error code : "
-					+ response.getStatus());
-		}
+		if (response.getStatus() != 200) 
+			throw new MayoException("Failed : HTTP error code : " + response.getStatus());
+		String textResponse = (response.getEntity(String.class));
+		return Long.parseLong(textResponse);
+		
 	}
 	
-	/**
-	 * 
-	 */
-	public void deleteAll() {
-		for (Object database : DATABASES) {
+	@SuppressWarnings("unchecked")
+	public void updateUserInformation(String[] phonesUser, String[] emailsUser, String token){
+		Form f = new Form();
+		JSONArray phones = new JSONArray();
+		phones.addAll(Arrays.asList(phonesUser));
+		f.add(PHONES, phones);
+		JSONArray emails = new JSONArray();
+		emails.addAll(Arrays.asList(emailsUser));
+		f.add(EMAILS, emails);
+		WebResource webResource = client.resource("http://localhost:9090/rest/mayo/updateUserInformation");
+		Builder builder = webResource.getRequestBuilder();
+		if (token != null) 
+			builder = builder.cookie(new NewCookie(IMayoService.MAYO_AUTH_TOKEN, token));
+		ClientResponse response = builder.type(MediaType.APPLICATION_FORM_URLENCODED).post(ClientResponse.class, f);
+
+		if (response.getStatus() != 204) 
+			throw new MayoException("Failed : HTTP error code : " + response.getStatus());
+		
+	}
+	
+	public static void deleteAll() {
+		for (Object database : IMayoService.DATABASES) {
 			delete(database);
 		}
 	}
 	
 	public static void printAll() {
-		for (Object database : DATABASES) {
+		for (Object database : IMayoService.DATABASES) {
 			printDatabase(database);
 		}
 	}

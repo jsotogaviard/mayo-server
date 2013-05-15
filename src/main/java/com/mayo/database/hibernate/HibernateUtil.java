@@ -12,6 +12,8 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AnnotationConfiguration;
+
+import com.mayo.MayoException;
  
 public class HibernateUtil {
  
@@ -24,7 +26,6 @@ public class HibernateUtil {
             		.configure()
                     .buildSessionFactory();
         } catch (Throwable ex) {
-            System.err.println("Initial SessionFactory creation failed." + ex);
             throw new ExceptionInInitializerError(ex);
         }
     }
@@ -64,7 +65,6 @@ public class HibernateUtil {
 			
 		}
 		String sql = sb.substring(0, sb.length() - " AND ".length());
-		System.out.println(sql);
 		Query query = session.createQuery(sql);
 		return new ArrayList<T>(query.list());
 	}
@@ -72,15 +72,10 @@ public class HibernateUtil {
 	public static <T> Object save(T employee) {
 		SessionFactory sf = HibernateUtil.getSessionFactory();
 		Session session = sf.openSession();
-
 		session.beginTransaction();
-
 		Serializable id = session.save(employee);
-
 		session.getTransaction().commit();
-
 		session.close();
-		
 		return id;
 
 	}
@@ -88,13 +83,9 @@ public class HibernateUtil {
 	public static <T>  T update(T employee) {
 		SessionFactory sf = HibernateUtil.getSessionFactory();
 		Session session = sf.openSession();
-
 		session.beginTransaction();
-
 		session.merge(employee);
-
 		session.getTransaction().commit();
-
 		session.close();
 		return employee;
 
@@ -121,7 +112,7 @@ public class HibernateUtil {
 	public static <T> T getOne(List<T> list){
 		Set<T> uniqueObjects = new HashSet<T>(list);
 		if (uniqueObjects.size() != 1) {
-			throw new RuntimeException(list + "");
+			throw new MayoException(list + "");
 		} else {
 			return uniqueObjects.iterator().next();
 		}

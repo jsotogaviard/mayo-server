@@ -1,0 +1,53 @@
+[user]
+    name = jonathan
+    email = jso@quartetfs.com
+ 
+[color]
+    ui = auto
+ 
+[color "branch"]
+    current = yellow reverse
+    local = yellow
+    remote = green
+ 
+[color "diff"]
+    meta = yellow bold
+    frag = magenta bold
+    old = red bold
+    new = green bold
+    whitespace = red reverse
+ 
+[color "status"]
+    added = yellow
+    changed = green
+    untracked = cyan
+ 
+[core]
+    whitespace = fix,-indent-with-non-tab,trailing-space
+	excludesfile = c:/Users/jso/.gitignore_global
+    autocrlf = false
+[alias]
+    amend = !EDITOR=true git commit --amend
+    v = !gitk --all
+    f = fetch
+    br = branch
+    ci = commit
+    co = checkout
+    cpk = cherry-pick
+    df = diff
+    dfc = diff --cached
+    dif = diff
+    hist = log
+    lg = log -p
+    lol = log --graph --decorate --pretty=oneline --abbrev-commit
+    lola = log --graph --decorate --pretty=oneline --abbrev-commit --all
+    r = rebase
+    ri = rebase -i
+    ra = rebase --abort
+    rev = revert
+    rmc = rm --cached
+    st = status
+[credential]
+	helper = !'C:\\Users\\jso\\AppData\\Roaming\\GitCredStore\\git-credential-winstore.exe'
+[push]
+	default = upstream

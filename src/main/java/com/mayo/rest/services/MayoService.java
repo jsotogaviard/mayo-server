@@ -1,10 +1,7 @@
 package com.mayo.rest.services;
 
 import static com.mayo.IMayoService.BIRTH_DATE;
-import static com.mayo.IMayoService.CONNECTIONS_CLASS;
 import static com.mayo.IMayoService.EMAILS;
-import static com.mayo.IMayoService.EMAILS_CONNECTIONS_CLASS;
-import static com.mayo.IMayoService.EMAILS_USERS_CLASS;
 import static com.mayo.IMayoService.EMTPY_ARRAY;
 import static com.mayo.IMayoService.FIRST_NAME;
 import static com.mayo.IMayoService.ID;
@@ -16,8 +13,6 @@ import static com.mayo.IMayoService.NAME;
 import static com.mayo.IMayoService.NO_VALUE;
 import static com.mayo.IMayoService.PASSWORD;
 import static com.mayo.IMayoService.PHONES;
-import static com.mayo.IMayoService.PHONES_CONNECTIONS_CLASS;
-import static com.mayo.IMayoService.PHONES_USERS_CLASS;
 import static com.mayo.IMayoService.SEX;
 import static com.mayo.IMayoService.USERS_CLASS;
 import static com.mayo.IMayoService.USER_ID;
@@ -31,13 +26,10 @@ import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TLongArrayList;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
 
@@ -62,6 +54,7 @@ import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.mayo.IMayoService;
 import com.mayo.IUserMatcher;
 import com.mayo.MayoException;
 import com.mayo.database.hibernate.Connections;
@@ -69,6 +62,7 @@ import com.mayo.database.hibernate.EmailsConnections;
 import com.mayo.database.hibernate.EmailsUsers;
 import com.mayo.database.hibernate.Links;
 import com.mayo.database.hibernate.PhonesConnections;
+import com.mayo.database.hibernate.PhonesUsers;
 import com.mayo.database.hibernate.Users;
 import com.mayo.mail.AMail;
 import com.mayo.mail.ConnectionEmail;
@@ -122,8 +116,7 @@ public class MayoService{
 	@Path("/login")
 	@POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	@Produces(MediaType.TEXT_HTML)
-	public String login(
+	public void login(
 			@FormParam(MAIN_EMAIL) String mainEmail,
 			@FormParam(PASSWORD) String password,
 			@Context HttpServletResponse servletResponse) throws ParseException, JsonParseException, JsonMappingException, IOException{
@@ -138,7 +131,6 @@ public class MayoService{
 			// Return the created token
 			String token = tokenStore.createToken(user.getId());
 			servletResponse.addCookie(new Cookie(MAYO_AUTH_TOKEN, token));
-			return "ok";
 		} else {
 			throw new MayoException("User is not verified");
 		}
@@ -179,7 +171,7 @@ public class MayoService{
 			// Add email to queue
 			VerificationMail email = new VerificationMail(mainEmail, userId);
 			emailQueue.offer(email);
-			return "ok";
+			return Long.toString(userId);
 		} else {
 
 			// The user exists
@@ -192,7 +184,6 @@ public class MayoService{
 	@Path("/userConnection")
 	@POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	// FIXME 
 	@Produces(MediaType.TEXT_HTML)
 	public String addUserConnection(
 			@FormParam(NAME) String name,
@@ -202,22 +193,7 @@ public class MayoService{
 		String[] phones = mapper.readValue(jsonPhones, String[].class);
 		String[] emails = mapper.readValue(jsonEmails, String[].class);
 
-		long currentUserId = NO_VALUE;
-		Cookie[] cookies = httpRequest.getCookies();
-		for (int i = 0; i < cookies.length; i++) {
-			if(cookies[i].getName().equals(MAYO_AUTH_TOKEN)){
-				String token = cookies[i].getValue();
-				currentUserId = tokenStore.validateToken(token);
-				if (currentUserId == NO_VALUE) {
-					throw new MayoException("Token of user is not valid");	
-				} 
-			} else {
-				throw new MayoException("Token of user is not avalaible");
-			}
-		}
-		
-		if (currentUserId == NO_VALUE) 
-			throw new MayoException(" The user has not been logged in");
+		long currentUserId = matcher.findUser(httpRequest.getCookies(), tokenStore);
 		
 		// Search among phones
 		// and emails
@@ -251,28 +227,57 @@ public class MayoService{
 		link.setConnections(list.toArray());
 		update(link);
 
-		List<long[]> result =  new ArrayList<long[]>();
-		Set<Long> linkedUsers = matcher.usersLinks(currentUserId);
-		for (Long linkedUser : linkedUsers) {
-			Set<Long> reverseLinkedUsers = matcher.usersLinks(linkedUser);
-			if (reverseLinkedUsers.contains(currentUserId)) {
-				result.add(new long[]{linkedUser, currentUserId});
-			}
-		}
+		List<long[]> result = matcher.findLinkedUsers(currentUserId);
 		
 		// Send the email
-		for (long[] linked : result) {
-			System.out.println("foud match " + Arrays.toString(linked));
-			List<Users> users1 = search(USERS_CLASS, Collections.<String,Object>singletonMap(ID, linked[0]));
-			Users user1 = getOne(users1);
-			List<Users> users2 = search(USERS_CLASS, Collections.<String,Object>singletonMap(ID, linked[1]));
-			Users user2 = getOne(users2);
-			emailQueue.add(new ConnectionEmail(user1, user2));
-			emailQueue.add(new ConnectionEmail(user2, user1));
-		}
+		sendConnectionEmail(result);
 		
-		return "ok";		
+		return Long.toString(connectionId);		
 	}
+	
+	@Path("/updateUserInformation")
+	@POST
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	public void updateUserInformation(
+			@FormParam(EMAILS) String jsonEmails,
+			@FormParam(PHONES) String jsonPhones,
+			@Context HttpServletResponse servletResponse) throws ParseException, JsonParseException, JsonMappingException, IOException{
+		String[] phones = mapper.readValue(jsonPhones, String[].class);
+		String[] emails = mapper.readValue(jsonEmails, String[].class);
+
+		long currentUserId = matcher.findUser(httpRequest.getCookies(), tokenStore);
+
+		// TODO Search for the mail before inserting
+		// If there is an equivalent mail
+		// check that it is the same
+		for (String email : emails) 
+			save(new EmailsUsers(currentUserId, email));
+
+		for (String phone : phones) 
+			save(new PhonesUsers(currentUserId, phone));
+		
+		// Search among the connections
+		Long connectionId = matcher.matchConnection(emails, phones);
+		if (connectionId == null) {
+
+			// No connection was found
+			// Nothing to do 
+		} else {
+			
+			// There is a connection
+			// Save it
+			List<Links> links = search(LINKS_CLASS, Collections.<String,Object>singletonMap(USER_ID, currentUserId));
+			Links link = getOne(links);
+			link.setConnectionId(connectionId);
+			update(link);
+			
+			List<long[]> result = matcher.findLinkedUsers(currentUserId);
+			
+			// Send the email
+			sendConnectionEmail(result);
+		}
+	}
+
 
 	@Path("/coucou")
 	@GET
@@ -282,28 +287,52 @@ public class MayoService{
 		return printAll();
 	}
 	
+	public void sendConnectionEmail(List<long[]> result){
+		// Send the email
+		for (long[] linked : result) {
+			List<Users> users1 = search(USERS_CLASS, Collections.<String,Object>singletonMap(ID, linked[0]));
+			Users user1 = getOne(users1);
+			
+			// Do not send many times the connection
+			// email
+			if (user1.isConnectionEmailSent()){
+				return;
+			} else {
+				
+				// Set the email as sent
+				user1.setConnectionEmailSent(true);
+				update(user1);
+			}
+			List<Users> users2 = search(USERS_CLASS, Collections.<String,Object>singletonMap(ID, linked[1]));
+			Users user2 = getOne(users2);
+
+			// Do not send many times the connection
+			// email
+			if (user2.isConnectionEmailSent()){ 
+				return;
+			} else {
+				
+				// Set the email as sent
+				user2.setConnectionEmailSent(true);
+				update(user2);
+			}
+			
+			// Send an email to both
+			emailQueue.add(new ConnectionEmail(user1, user2));			
+			emailQueue.add(new ConnectionEmail(user2, user1));
+		}
+	}
+	
 	public static String printAll() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Coucou <br>");
-		for (Object database : DATABASES) {
+		for (Object database : IMayoService.DATABASES) {
 			sb.append(printDatabase(database));
 			sb.append("<br>");
 		}
 		return sb.toString();
 	}
 	
-	public static final Object[] DATABASES = new Object[]{
-		USERS_CLASS,
-		EMAILS_USERS_CLASS,
-		PHONES_USERS_CLASS,
-		
-		CONNECTIONS_CLASS,
-		EMAILS_CONNECTIONS_CLASS,
-		PHONES_CONNECTIONS_CLASS,
-		
-		LINKS_CLASS,
-	};
-
 	protected static <T> String printDatabase(T clazz) {
 		StringBuilder sb = new StringBuilder();
 		final String name = clazz.getClass().getName();
@@ -316,13 +345,5 @@ public class MayoService{
 		}
 		return sb.toString();
 		
-	}
-	
-	
-	public static void main(String[] args) throws JsonParseException, JsonMappingException, IOException {
-		/** To handler json types*/
-		ObjectMapper mapper = new ObjectMapper();
-		List<?> r = mapper.readValue("[\"05\"]", List.class);
-		System.out.println(r);
 	}
 }

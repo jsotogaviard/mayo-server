@@ -33,8 +33,6 @@ public class AMail {
 			return true;
 		if (obj == null)
 			return false;
-		if (getClass() != obj.getClass())
-			return false;
 		AMail other = (AMail) obj;
 		if (subject == null) {
 			if (other.subject != null)

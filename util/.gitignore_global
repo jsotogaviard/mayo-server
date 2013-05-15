@@ -1,0 +1,27 @@
+# Binaries
+######################
+*.class
+ 
+# Eclipse
+######################
+.project
+.settings
+.classpath
+
+# h2 database
+######################
+*.db
+ 
+# Maven
+######################
+target
+
+# GWT
+######################
+war
+gwt-unitCache
+ 
+# Temporary files
+######################
+*.swp
+*.log

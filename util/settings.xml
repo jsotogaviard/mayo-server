@@ -1,0 +1,59 @@
+ <settings>  
+	<localRepository>${env.VIEW_HOME}\maven\repo</localRepository>  
+	<profiles>  
+		<profile>  
+ 			<id>jdk-1.6</id>  
+ 			<activation>  
+ 				<activeByDefault>true</activeByDefault>  
+ 				<jdk>1.6</jdk>  
+ 			</activation>  
+ 			<repositories>  
+ 				<repository>  
+ 					<id>jbossRepository</id>  
+ 					<name>jbossRepository</name>  
+ 					<url>https://repository.jboss.org/nexus/content/groups/public/</url>  
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+ 					<layout>default</layout>  
+ 				</repository>  
+   
+ 				<repository>  
+ 			        <id>codehaus-release-repo</id>  
+ 			        <name>Codehaus Release Repo</name>  
+ 			        <url>https://nexus.codehaus.org/content/repositories/releases/</url>  
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+ 		        </repository>  
+				
+		<repository>
+            <id>pentaho</id>
+            <name>pentaho</name>
+            <url>http://repository.pentaho.org/artifactory/pentaho</url>
+        </repository>
+ 
+        <repository>
+            <id>pentaho-third-party</id>
+            <name>pentaho-third-party</name>
+            <url>http://repository.pentaho.org/artifactory/third-party</url>
+        </repository>
+   		</repositories>  
+   
+ 			<pluginRepositories>    
+ 				<pluginRepository>  
+ 			        <id>Codehaus</id>  
+ 			        <name>Codehaus Snapshots Repository</name>  
+ 			        <url>https://nexus.codehaus.org/content/repositories/codehaus-snapshots/</url>  
+  		        </pluginRepository>  
+ 			</pluginRepositories>  
+   
+ 		</profile>
+ 	 </profiles>
+	 
+ 	 <!-- the section below is used for deployment -->  
+ 	 <servers>  
+ 	 </servers>  
+	 
+ </settings>  
+  

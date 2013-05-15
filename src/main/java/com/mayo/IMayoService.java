@@ -72,6 +72,7 @@ public interface IMayoService {
 	public static final String SEX = "sex";
 	public static final String CONNECTION_ID = "connection_id";
 	public static final String VERIFIED = "verified";
+	public static final String CONNECTION_EMAIL_SENT = "connection_email_sent";
 
 	public static final String MAYO_AUTH_TOKEN = "MAYO_AUTH_TOKEN";
 	
@@ -79,6 +80,18 @@ public interface IMayoService {
 
 	/** TODO better method for test environment */
 	public static final String TEST_ENV = "TestEnvironment";
+	
+	public static final Object[] DATABASES = new Object[]{
+		USERS_CLASS,
+		EMAILS_USERS_CLASS,
+		PHONES_USERS_CLASS,
+		
+		CONNECTIONS_CLASS,
+		EMAILS_CONNECTIONS_CLASS,
+		PHONES_CONNECTIONS_CLASS,
+		
+		LINKS_CLASS,
+	};
 	
 	
 

@@ -157,8 +157,7 @@
 				<configuration>
 					<outputEncoding>UTF-8</outputEncoding>
 					<includes>
-						<include>**/Test*.java</include>
-						<include>test/**/*</include>
+						<include>**/*Test*.java</include>
 					</includes>
 				</configuration>
 			</plugin>
@@ -196,29 +195,5 @@
 			</plugin>
 		</plugins>
 	</build>
-
-	<profiles>
-		<profile>
-			<!-- Run the standard unit tests, without code coverage -->
-			<id>default</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-surefire-plugin</artifactId>
-						<configuration>
-							<!-- <excludes> -->
-							<!-- <exclude>no-tests-are-excluded</exclude> -->
-							<!-- </excludes> -->
-							<!-- <argLine>-Xms1G -Xmx1G -XX:MaxDirectMemorySize=1G</argLine> -->
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
 
 </project>

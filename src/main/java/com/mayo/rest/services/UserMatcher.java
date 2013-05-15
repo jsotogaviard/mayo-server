@@ -11,6 +11,8 @@ import static com.mayo.IMayoService.EMAIL;
 import static com.mayo.IMayoService.EMAILS_CONNECTIONS_CLASS;
 import static com.mayo.IMayoService.EMAILS_USERS_CLASS;
 import static com.mayo.IMayoService.LINKS_CLASS;
+import static com.mayo.IMayoService.MAYO_AUTH_TOKEN;
+import static com.mayo.IMayoService.NO_VALUE;
 import static com.mayo.IMayoService.PHONE;
 import static com.mayo.IMayoService.PHONES_CONNECTIONS_CLASS;
 import static com.mayo.IMayoService.PHONES_USERS_CLASS;
@@ -25,7 +27,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.servlet.http.Cookie;
+
 import com.mayo.IUserMatcher;
+import com.mayo.MayoException;
 import com.mayo.database.hibernate.EmailsConnections;
 import com.mayo.database.hibernate.EmailsUsers;
 import com.mayo.database.hibernate.Links;
@@ -89,6 +94,42 @@ public class UserMatcher implements IUserMatcher {
 		
 		// Real users that it is connected to 
 		return realUsers;
+	}
+
+	@Override
+	public long findUser(Cookie[] cookies, TokenStore tokenStore) {
+		long currentUserId = NO_VALUE;
+		for (int i = 0; i < cookies.length; i++) {
+			if(cookies[i].getName().equals(MAYO_AUTH_TOKEN)){
+				String token = cookies[i].getValue();
+				currentUserId = tokenStore.validateToken(token);
+				if (currentUserId == NO_VALUE) {
+					throw new MayoException("Token of user is not valid");	
+				} 
+			} else {
+				throw new MayoException("Token of user is not avalaible");
+			}
+		}
+		
+		if (currentUserId == NO_VALUE) 
+			throw new MayoException(" The user has not been logged in");
+		
+		return currentUserId;
+	}
+
+	@Override
+	public List<long[]> findLinkedUsers(long currentUserId) {
+		List<long[]> result =  new ArrayList<long[]>();
+		Set<Long> linkedUsers = usersLinks(currentUserId);
+		for (Long linkedUser : linkedUsers) {
+			Set<Long> reverseLinkedUsers = usersLinks(linkedUser);
+			if (reverseLinkedUsers.contains(currentUserId)) {
+				result.add(new long[]{linkedUser, currentUserId});
+			}
+		}
+		
+		return result;
+		
 	}
 
 }

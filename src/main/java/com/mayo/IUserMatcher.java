@@ -6,7 +6,12 @@
  */
 package com.mayo;
 
+import java.util.List;
 import java.util.Set;
+
+import javax.servlet.http.Cookie;
+
+import com.mayo.rest.services.TokenStore;
 
 /**
  *
@@ -36,4 +41,17 @@ public interface IUserMatcher {
 	 * @return
 	 */
 	Set<Long> usersLinks(Long user_id);
+
+	/**
+	 * @param cookies
+	 * @param tokenStore
+	 * @return
+	 */
+	long findUser(Cookie[] cookies, TokenStore tokenStore);
+
+	/**
+	 * @param currentUserId
+	 * @return 
+	 */
+	List<long[]> findLinkedUsers(long currentUserId);
 }

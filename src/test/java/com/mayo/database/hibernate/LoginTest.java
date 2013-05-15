@@ -8,8 +8,8 @@ public class LoginTest extends AServiceTests {
 	@Test
 	public void uniqueTest() {
 		// Add the verified user to the database
-		addUser(email, password);
-		HibernateUtil.update(new Users(1L, email, password, true));
+		long userId = addUser(email, password);
+		HibernateUtil.update(new Users(userId, email, password, true));
 		String token = login("jso@qfs.com", password);
 		Assert.assertNotNull(token);
 		

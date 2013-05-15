@@ -7,6 +7,7 @@
 package com.mayo.database.hibernate;
 
 import static com.mayo.IMayoService.BIRTH_DATE;
+import static com.mayo.IMayoService.CONNECTION_EMAIL_SENT;
 import static com.mayo.IMayoService.FIRST_NAME;
 import static com.mayo.IMayoService.LAST_NAME;
 import static com.mayo.IMayoService.MAIN_EMAIL;
@@ -55,6 +56,9 @@ public class Users {
 	@Column(name=VERIFIED)
 	protected boolean verified;
 	
+	@Column(name=CONNECTION_EMAIL_SENT)
+	protected boolean connectionEmailSent;
+	
 	public Users() {}
 	
 	/** Used for tests */
@@ -76,6 +80,9 @@ public class Users {
 		// When creating the user
 		// The verification is false
 		this.verified = false ;
+		
+		// The connection email is not sent
+		this.connectionEmailSent = false;
 	}
 	
 	public Long getId() {
@@ -92,6 +99,21 @@ public class Users {
 
 	public void setVerified(boolean verified) {
 		this.verified = verified;
+	}
+
+	/**
+	 * @return The connectionEmailSent
+	 */
+	public boolean isConnectionEmailSent() {
+		return this.connectionEmailSent;
+	}
+
+	/**
+	 * Sets the connectionEmailSent
+	 * @param connectionEmailSent The connectionEmailSent to set
+	 */
+	public void setConnectionEmailSent(boolean connectionEmailSent) {
+		this.connectionEmailSent = connectionEmailSent;
 	}
 
 	@Override
