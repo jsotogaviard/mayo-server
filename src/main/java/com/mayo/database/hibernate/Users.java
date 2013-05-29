@@ -186,5 +186,14 @@ public class Users {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return "Users [id=" + this.id + ", mainEmail=" + this.mainEmail
+				+ ", firstName=" + this.firstName + ", verified="
+				+ this.verified + ", connectionEmailSent="
+				+ this.connectionEmailSent + "]";
+	}
+
+	
 	
 }

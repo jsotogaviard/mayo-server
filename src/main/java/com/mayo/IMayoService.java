@@ -93,6 +93,8 @@ public interface IMayoService {
 		LINKS_CLASS,
 	};
 	
+	public static final String AWS_SERVER = "http://ec2-54-214-124-166.us-west-2.compute.amazonaws.com:9090/mayo/rest/mayo/";
+	
 	
 
 	/**

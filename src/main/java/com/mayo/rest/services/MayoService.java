@@ -116,7 +116,7 @@ public class MayoService{
 	@Path("/login")
 	@POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public void login(
+	public String login(
 			@FormParam(MAIN_EMAIL) String mainEmail,
 			@FormParam(PASSWORD) String password,
 			@Context HttpServletResponse servletResponse) throws ParseException, JsonParseException, JsonMappingException, IOException{
@@ -131,6 +131,8 @@ public class MayoService{
 			// Return the created token
 			String token = tokenStore.createToken(user.getId());
 			servletResponse.addCookie(new Cookie(MAYO_AUTH_TOKEN, token));
+			
+			return "  ";
 		} else {
 			throw new MayoException("User is not verified");
 		}
