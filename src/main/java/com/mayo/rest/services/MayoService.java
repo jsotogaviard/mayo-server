@@ -98,7 +98,7 @@ public class MayoService{
 	@GET
 	@Produces(MediaType.TEXT_HTML)
 	public String verifyEmail(@PathParam(USER_ID) String userId, @QueryParam(MAIN_EMAIL) String mainEmail){
-		LOGGER.info("Verifying " + userId + " " + mainEmail);
+		LOGGER.info("Verifying " + mainEmail);
 		Map<String, Object> slicers = new HashMap<String,Object>();
 		slicers.put(MAIN_EMAIL, mainEmail);
 		slicers.put(ID, userId);
@@ -120,7 +120,7 @@ public class MayoService{
 			@FormParam(MAIN_EMAIL) String mainEmail,
 			@FormParam(PASSWORD) String password,
 			@Context HttpServletResponse servletResponse) throws ParseException, JsonParseException, JsonMappingException, IOException{
-		
+		LOGGER.info("login " + mainEmail);
 		Map<String, Object> slicers = new HashMap<String,Object>();
 		slicers.put(MAIN_EMAIL, mainEmail);
 		slicers.put(PASSWORD, password);
@@ -152,6 +152,7 @@ public class MayoService{
 			@FormParam(SEX) String sex,
 			@Context HttpServletResponse servletResponse) throws ParseException, JsonParseException, JsonMappingException, IOException{
 
+		LOGGER.info("register user  " + mainEmail);
 		List<Users> existingUsers = search(USERS_CLASS, Collections.<String,Object>singletonMap(MAIN_EMAIL, mainEmail));
 		Users user = getOneOrNone(existingUsers);
 		if (user == null) {
@@ -192,6 +193,8 @@ public class MayoService{
 			@FormParam(EMAILS) String jsonEmails,
 			@FormParam(PHONES) String jsonPhones,
 			@Context HttpServletResponse servletResponse) throws ParseException, JsonParseException, JsonMappingException, IOException{
+		LOGGER.info("add user  " + name);
+		
 		String[] phones = mapper.readValue(jsonPhones, String[].class);
 		String[] emails = mapper.readValue(jsonEmails, String[].class);
 
