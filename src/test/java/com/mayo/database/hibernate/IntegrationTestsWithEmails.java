@@ -13,13 +13,13 @@ public class IntegrationTestsWithEmails extends AServiceTests {
 	@Test
 	public void uniqueTest() {
 		// Jonathan adds rita
-		long userId = addUser(email, password);
+		long userId = registerUser(email, password);
 		HibernateUtil.update(new Users(userId, email, password, true));
 		String tokenSoto = login(email, password);
 		addUserConnection("rita", new String[]{}, new String[]{email1}, tokenSoto);
 
 		// Rita adds Jonathan
-		long userId1 = addUser(email1, password1);
+		long userId1 = registerUser(email1, password1);
 		HibernateUtil.update(new Users(userId1, email1, password1, true));
 		String tokenRita = login(email1, password1);
 		addUserConnection("jon", new String[]{}, new String[]{email}, tokenRita);

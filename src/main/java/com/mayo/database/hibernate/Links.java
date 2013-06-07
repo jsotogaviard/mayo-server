@@ -6,8 +6,6 @@
  */
 package com.mayo.database.hibernate;
 
-import java.util.Arrays;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -24,30 +22,25 @@ import com.mayo.IMayoService;
 public class Links {
 	
 	@Id
-	@Column(name="user_id")
+	@Column(name=IMayoService.USER_ID)
 	protected Long userId;
 	
-	@Column(name="connection_id")
+	@Column(name=IMayoService.CONNECTION_ID)
 	protected Long connectionId;
 	
-	@Column(name="connections")
-	protected long[] connections;
-
 	/** Constructor
 	 * @param userId
 	 * @param connectionId
 	 */
-	public Links(Long userId, Long connectionId, long[] connections) {
+	public Links(Long userId, Long connectionId) {
 		this.userId = userId;
 		this.connectionId = connectionId;
-		this.connections = connections;
 	}
 	
 	/** Constructor
 	 * 
 	 */
-	public Links() {
-	}
+	public Links() {}
 
 	/**
 	 * @return The userId
@@ -79,26 +72,10 @@ public class Links {
 		this.connectionId = connectionId;
 	}
 
-	/**
-	 * @return The connections
-	 */
-	public long[] getConnections() {
-		return this.connections;
-	}
-	
-	/**
-	 * Sets the connections
-	 * @param connections The connections to set
-	 */
-	public void setConnections(long[] connections) {
-		this.connections = connections;
-	}
-
 	@Override
 	public String toString() {
 		return "Links [userId=" + this.userId + ", connectionId="
-				+ this.connectionId + ", connections="
-				+ Arrays.toString(this.connections) + "]";
+				+ this.connectionId + "]";
 	}
 
 	@Override
@@ -109,7 +86,6 @@ public class Links {
 				* result
 				+ ((this.connectionId == null) ? 0 : this.connectionId
 						.hashCode());
-		result = prime * result + Arrays.hashCode(this.connections);
 		result = prime * result
 				+ ((this.userId == null) ? 0 : this.userId.hashCode());
 		return result;
@@ -129,8 +105,6 @@ public class Links {
 				return false;
 		} else if (!this.connectionId.equals(other.connectionId))
 			return false;
-		if (!Arrays.equals(this.connections, other.connections))
-			return false;
 		if (this.userId == null) {
 			if (other.userId != null)
 				return false;
@@ -139,9 +113,4 @@ public class Links {
 		return true;
 	}
 
-	
-	
-	
-	
-	
 }

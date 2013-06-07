@@ -11,6 +11,7 @@ import java.util.List;
 import com.mayo.database.hibernate.Connections;
 import com.mayo.database.hibernate.EmailsConnections;
 import com.mayo.database.hibernate.EmailsUsers;
+import com.mayo.database.hibernate.Interests;
 import com.mayo.database.hibernate.Links;
 import com.mayo.database.hibernate.PhonesConnections;
 import com.mayo.database.hibernate.PhonesUsers;
@@ -54,6 +55,13 @@ public interface IMayoService {
 	public static final String LINKS = "Links";
 	public static final String LINKS_ID = LINKS.toLowerCase() + _ID;
 	
+	/** Interests's tables */
+	public static final Interests INTERESTS_CLASS = new Interests();
+	public static final String INTERESTS = "Interests";
+	public static final String FROM_USER = "from_user";
+	public static final String TO_USER = "to_user";
+	public static final String INTERESTS_ID = INTERESTS.toLowerCase() + _ID;
+	
 	public static final String ID = "id";
 	
 	public static final String EMAIL = "email";
@@ -91,12 +99,11 @@ public interface IMayoService {
 		PHONES_CONNECTIONS_CLASS,
 		
 		LINKS_CLASS,
+		INTERESTS_CLASS
 	};
 	
 	public static final String AWS_SERVER = "http://ec2-54-214-124-166.us-west-2.compute.amazonaws.com:9090/mayo/rest/mayo/";
 	
-	
-
 	/**
 	 * 
 	 * @param name

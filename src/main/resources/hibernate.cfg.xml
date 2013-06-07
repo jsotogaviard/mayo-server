@@ -37,6 +37,8 @@
  		<mapping class="com.mayo.database.hibernate.EmailsUsers"/>
  		<mapping class="com.mayo.database.hibernate.PhonesUsers"/>
  		<mapping class="com.mayo.database.hibernate.Links"/>
+ 		<mapping class="com.mayo.database.hibernate.Interests"/>
+ 		
  		
  		 
     </session-factory>

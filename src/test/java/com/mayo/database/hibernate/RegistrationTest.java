@@ -17,7 +17,7 @@ public class RegistrationTest extends AServiceTests {
 	
 	@Test
 	public void uniqueTest() {
-		long userId = addUser(email, password);
+		long userId = registerUser(email, password);
 		validateDatabase(USERS_CLASS, Arrays.asList(new Users(userId, email ,password, false)));
 		validateDatabase(EMAILS_USERS_CLASS, Arrays.asList(new EmailsUsers(userId, email)));
 		
@@ -29,11 +29,23 @@ public class RegistrationTest extends AServiceTests {
 		validateUser(userId, email);
 		validateDatabase(USERS_CLASS, Arrays.asList(new Users(userId, email ,password, true)));
 		
+		// Update the email with another email
+		String cookie = login(email, password);
+		updateUserInformation(new String[]{}, new String[]{email1}, cookie);
+		
 		// Adding user already registered
 		try {
-			addUser(email, password);
+			registerUser(email, password);
 			Assert.fail();
 		} catch (Exception ex) {}
+
+		// Adding user already registered
+		// With another email
+		try {
+			registerUser(email1, password);
+			Assert.fail();
+		} catch (Exception ex) {}
+				
 		
 		// Already verified
 		// Must not throw

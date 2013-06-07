@@ -11,6 +11,7 @@ import java.util.Set;
 
 import javax.servlet.http.Cookie;
 
+import com.mayo.database.hibernate.Interests;
 import com.mayo.rest.services.TokenStore;
 
 /**
@@ -20,20 +21,24 @@ import com.mayo.rest.services.TokenStore;
 public interface IUserMatcher {
 
 	/**
+	 * Null corresponds to a no match
+	 * Otherwise returns the connection id value
 	 * 
-	 * @param emails
-	 * @param phones
-	 * @return
+	 * @param emails the user emails
+	 * @param phones the user phones
+	 * @return null or the found user id
 	 */
-	Long matchConnection(String[] emails, String[] phones);
+	Long searchConnection(String[] emails, String[] phones);
 	
 	/**
+	 * Null corresponds to a no match. Otherwise
+	 * return the user id value
 	 * 
-	 * @param emails
-	 * @param phones
-	 * @return
+	 * @param emails the user emails
+	 * @param phones the user phones
+	 * @return null or the found user id
 	 */
-	Long matchUser(String[] emails, String[] phones);
+	Long searchUser(String[] emails, String[] phones);
 	
 	/**
 	 * 
@@ -43,9 +48,13 @@ public interface IUserMatcher {
 	Set<Long> usersLinks(Long user_id);
 
 	/**
+	 * Search among the given cookies
+	 * of the http request the mayo cookies
+	 * that identify the user
+	 * 
 	 * @param cookies
 	 * @param tokenStore
-	 * @return
+	 * @return the authenticated user
 	 */
 	long findUser(Cookie[] cookies, TokenStore tokenStore);
 
@@ -54,4 +63,11 @@ public interface IUserMatcher {
 	 * @return 
 	 */
 	List<long[]> findLinkedUsers(long currentUserId);
+
+	/**
+	 * @param currentUserId
+	 * @param connectionId
+	 * @return 
+	 */
+	List<Interests> findMatch(long currentUserId, Long connectionId);
 }

@@ -120,7 +120,7 @@ public class AServiceTests{
 
 	}
 	
-	public long addUser(String mainEmail,String pwd){
+	public long registerUser(String mainEmail,String pwd){
 		Form f = new Form();
 		f.add(MAIN_EMAIL, mainEmail);
 		f.add(PASSWORD, pwd);

@@ -17,7 +17,7 @@ public class AddUserConnectionTests extends AServiceTests {
 	public void uniqueTest() {
 		
 		// Add verified user
-		long userId = addUser(email, password);
+		long userId = registerUser(email, password);
 		HibernateUtil.update(new Users(userId, email ,password, true));
 		String token = login(email, password);
 		long userConnectionId = addUserConnection("rita", new String[]{"050505050"}, new String[]{"rita1@qfs.com"}, token);
