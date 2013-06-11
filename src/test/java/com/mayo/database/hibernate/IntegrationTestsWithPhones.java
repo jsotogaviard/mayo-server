@@ -26,13 +26,13 @@ public class IntegrationTestsWithPhones extends AServiceTests {
 		updateUserInformation(new String[]{phone1}, new String[]{}, tokenRita);
 		addUserConnection("jon", new String[]{phone}, new String[]{}, tokenRita);
 
-		waitSomeTime(3000);
+		waitSomeTime(1000);
 		
 		// Verify emails send
 		validateSentEmail(Arrays.<AMail>asList(new VerificationMail(email),
 				new VerificationMail(email1),
-				new ConnectionEmail(email),
-				new ConnectionEmail(email1)
+				new ConnectionEmail(email1),
+				new ConnectionEmail(email)
 				));
 	}
 	

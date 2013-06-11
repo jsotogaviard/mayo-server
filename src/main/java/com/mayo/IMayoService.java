@@ -6,8 +6,6 @@
  */
 package com.mayo;
 
-import java.util.List;
-
 import com.mayo.database.hibernate.Connections;
 import com.mayo.database.hibernate.EmailsConnections;
 import com.mayo.database.hibernate.EmailsUsers;
@@ -60,6 +58,8 @@ public interface IMayoService {
 	public static final String INTERESTS = "Interests";
 	public static final String FROM_USER = "from_user";
 	public static final String TO_USER = "to_user";
+	public static final String TO_CONNECTION = "to_connection";
+	public static final String VERIFICATION_EMAIL_SENT = "verification_email_sent";
 	public static final String INTERESTS_ID = INTERESTS.toLowerCase() + _ID;
 	
 	public static final String ID = "id";
@@ -73,7 +73,6 @@ public interface IMayoService {
 	public static final String PHONE = "phone";
 	public static final String PHONES = "phones";
 	public static final String PASSWORD = "password";
-	public static final long[] EMTPY_ARRAY = new long[]{};
 	public static final Long NO_VALUE = -1L;
 	public static final String USER_ID = "user_id";
 	public static final String BIRTH_DATE = "birth_date";
@@ -103,32 +102,5 @@ public interface IMayoService {
 	};
 	
 	public static final String AWS_SERVER = "http://ec2-54-214-124-166.us-west-2.compute.amazonaws.com:9090/mayo/rest/mayo/";
-	
-	/**
-	 * 
-	 * @param name
-	 * @param emails
-	 * @param phones
-	 * @return
-	 */
-	long registerMayoUser(String name, String password, String mainEmail, String[] emails, String[] phones);
-	
-	
-	/**
-	 * 
-	 * @param name
-	 * @param password
-	 * @return
-	 */
-	long loginMayoUser(String name, String password);
-	
-	/**
-	 * 
-	 * @param name
-	 * @param emails
-	 * @param phones
-	 */
-	List<long[]> addMayoConnection(long currentUser, String name, String[] emails, String[] phones);
-	
 	
 }

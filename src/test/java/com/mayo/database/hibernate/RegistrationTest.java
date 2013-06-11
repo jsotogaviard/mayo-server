@@ -22,7 +22,7 @@ public class RegistrationTest extends AServiceTests {
 		validateDatabase(EMAILS_USERS_CLASS, Arrays.asList(new EmailsUsers(userId, email)));
 		
 		// Wait for the mails to arrive
-		waitSomeTime(3000);
+		waitSomeTime(1000);
 		
 		validateSentEmail(Collections.<AMail>singletonList(new VerificationMail(email)));
 	

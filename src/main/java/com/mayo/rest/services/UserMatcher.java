@@ -9,15 +9,17 @@ package com.mayo.rest.services;
 import static com.mayo.IMayoService.EMAIL;
 import static com.mayo.IMayoService.EMAILS_CONNECTIONS_CLASS;
 import static com.mayo.IMayoService.EMAILS_USERS_CLASS;
+import static com.mayo.IMayoService.INTERESTS_CLASS;
 import static com.mayo.IMayoService.MAYO_AUTH_TOKEN;
 import static com.mayo.IMayoService.NO_VALUE;
 import static com.mayo.IMayoService.PHONE;
 import static com.mayo.IMayoService.PHONES_CONNECTIONS_CLASS;
 import static com.mayo.IMayoService.PHONES_USERS_CLASS;
-import static com.mayo.database.hibernate.HibernateUtil.getOne;
+import static com.mayo.IMayoService.TO_CONNECTION;
 import static com.mayo.database.hibernate.HibernateUtil.getOneOrNone;
-import static com.mayo.database.hibernate.HibernateUtil.save;
 import static com.mayo.database.hibernate.HibernateUtil.search;
+import static com.mayo.database.hibernate.HibernateUtil.searchOneOrNone;
+import static com.mayo.database.hibernate.HibernateUtil.update;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,7 +27,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.http.Cookie;
 
@@ -35,6 +36,7 @@ import com.mayo.MayoException;
 import com.mayo.database.hibernate.EmailsConnections;
 import com.mayo.database.hibernate.EmailsUsers;
 import com.mayo.database.hibernate.Interests;
+import com.mayo.database.hibernate.Links;
 import com.mayo.database.hibernate.PhonesConnections;
 import com.mayo.database.hibernate.PhonesUsers;
 
@@ -81,24 +83,6 @@ public class UserMatcher implements IUserMatcher {
 	}
 
 	@Override
-	public Set<Long> usersLinks(Long userId) {
-		return null;
-//		Set<Long> realUsers = new HashSet<Long>();
-//		List<Links> links = search(LINKS_CLASS, Collections.<String,Object>singletonMap(USER_ID, userId));
-//		Links link = getOne(links);
-//		for (int i = 0; i < link.getConnections().length; i++) {
-//			long connectionId = link.getConnections()[i];
-//			List<Links> foundUsers = search(LINKS_CLASS, Collections.<String,Object>singletonMap(CONNECTION_ID, connectionId));
-//			for (Links foundUser : foundUsers) {
-//				realUsers.add(foundUser.getUserId());
-//			}
-//		}
-//		
-//		// Real users that it is connected to 
-//		return realUsers;
-	}
-
-	@Override
 	public long findUser(Cookie[] cookies, TokenStore tokenStore) {
 		long currentUserId = NO_VALUE;
 		for (int i = 0; i < cookies.length; i++) {
@@ -112,45 +96,36 @@ public class UserMatcher implements IUserMatcher {
 				throw new MayoException("Token of user is not avalaible");
 			}
 		}
-		
+
 		if (currentUserId == NO_VALUE) 
 			throw new MayoException(" The user has not been logged in");
-		
+
 		return currentUserId;
 	}
 
 	@Override
-	public List<long[]> findLinkedUsers(long currentUserId) {
-		List<long[]> result =  new ArrayList<long[]>();
-		Set<Long> linkedUsers = usersLinks(currentUserId);
-		for (Long linkedUser : linkedUsers) {
-			Set<Long> reverseLinkedUsers = usersLinks(linkedUser);
-			if (reverseLinkedUsers.contains(currentUserId)) {
-				result.add(new long[]{linkedUser, currentUserId});
-			}
-		}
-		
-		return result;
-		
-	}
-
-	@Override
-	public List<Interests> findMatch(long currentUserId, Long connectionIdUserCoordinates) {
-		Interests oneDirectionInterest = new Interests(currentUserId, connectionIdUserCoordinates);
-		save(oneDirectionInterest);
-		
-		// 4. Search the inverse configuration
-		// in the interest database
+	public List<Interests> findMatch(Interests interest) {
 		Map<String, Object> slicers = new HashMap<String,Object>();
-		slicers.put(IMayoService.FROM_USER, currentUserId);
-		slicers.put(IMayoService.TO_USER, connectionIdUserCoordinates);
-		List<Interests> interests = search(IMayoService.INTERESTS_CLASS, slicers);
-		Interests otherdirectionInterest = getOne(interests);
+		slicers.put(IMayoService.FROM_USER, interest.getToUser());
+		slicers.put(IMayoService.TO_USER, interest.getFromUser());
+		MayoService.printAll();
+		Interests otherdirectionInterest = searchOneOrNone(IMayoService.INTERESTS_CLASS, slicers);
 		if (otherdirectionInterest != null) {
-			return Arrays.asList(oneDirectionInterest, otherdirectionInterest);
+			return Arrays.asList(interest, otherdirectionInterest);
 		} else {
 			return Collections.emptyList();
 		}
+	}
+
+	@Override
+	public void updateInterests(Links link) {
+		List<Interests> interests = search(INTERESTS_CLASS, Collections.<String,Object>singletonMap(TO_CONNECTION, link.getConnectionId()));
+		for (Interests interest : interests) {
+			interest.setToConnection(null);
+			interest.setToUser(link.getUserId());
+			update(interest);
+		}
+		
 	}
 
 }

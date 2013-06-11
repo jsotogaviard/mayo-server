@@ -7,11 +7,11 @@
 package com.mayo;
 
 import java.util.List;
-import java.util.Set;
 
 import javax.servlet.http.Cookie;
 
 import com.mayo.database.hibernate.Interests;
+import com.mayo.database.hibernate.Links;
 import com.mayo.rest.services.TokenStore;
 
 /**
@@ -41,13 +41,6 @@ public interface IUserMatcher {
 	Long searchUser(String[] emails, String[] phones);
 	
 	/**
-	 * 
-	 * @param user_id
-	 * @return
-	 */
-	Set<Long> usersLinks(Long user_id);
-
-	/**
 	 * Search among the given cookies
 	 * of the http request the mayo cookies
 	 * that identify the user
@@ -59,15 +52,13 @@ public interface IUserMatcher {
 	long findUser(Cookie[] cookies, TokenStore tokenStore);
 
 	/**
-	 * @param currentUserId
-	 * @return 
+	 * @param oneDirectionInterest
+	 * @return
 	 */
-	List<long[]> findLinkedUsers(long currentUserId);
+	List<Interests> findMatch(Interests oneDirectionInterest);
 
 	/**
-	 * @param currentUserId
-	 * @param connectionId
-	 * @return 
+	 * @param link
 	 */
-	List<Interests> findMatch(long currentUserId, Long connectionId);
+	void updateInterests(Links link);
 }

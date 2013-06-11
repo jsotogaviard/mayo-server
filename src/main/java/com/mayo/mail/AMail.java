@@ -47,6 +47,11 @@ public class AMail {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return "AMail [to=" + this.to + ", subject=" + this.subject + "]";
+	}
+
 	public static void main(String[] args) {
 		long init = System.currentTimeMillis();
 		String to = "jsotogaviard@gmail.com";

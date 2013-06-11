@@ -68,6 +68,14 @@ public class HibernateUtil {
 		Query query = session.createQuery(sql);
 		return new ArrayList<T>(query.list());
 	}
+	
+	public static <T> T searchOne(T clazz, Map<String,Object> slicers) {
+		return getOne(search(clazz, slicers));
+	}
+	
+	public static <T> T searchOneOrNone(T clazz, Map<String,Object> slicers) {
+		return getOneOrNone(search(clazz, slicers));
+	}
     
 	public static <T> Object save(T employee) {
 		SessionFactory sf = HibernateUtil.getSessionFactory();

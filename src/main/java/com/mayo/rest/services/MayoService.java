@@ -1,9 +1,12 @@
 package com.mayo.rest.services;
 
 import static com.mayo.IMayoService.BIRTH_DATE;
+import static com.mayo.IMayoService.CONNECTION_ID;
 import static com.mayo.IMayoService.EMAILS;
 import static com.mayo.IMayoService.FIRST_NAME;
+import static com.mayo.IMayoService.FROM_USER;
 import static com.mayo.IMayoService.ID;
+import static com.mayo.IMayoService.INTERESTS_CLASS;
 import static com.mayo.IMayoService.LAST_NAME;
 import static com.mayo.IMayoService.LINKS_CLASS;
 import static com.mayo.IMayoService.MAIN_EMAIL;
@@ -12,13 +15,15 @@ import static com.mayo.IMayoService.NAME;
 import static com.mayo.IMayoService.PASSWORD;
 import static com.mayo.IMayoService.PHONES;
 import static com.mayo.IMayoService.SEX;
+import static com.mayo.IMayoService.TO_USER;
 import static com.mayo.IMayoService.USERS_CLASS;
 import static com.mayo.IMayoService.USER_ID;
 import static com.mayo.database.hibernate.HibernateUtil.getOne;
-import static com.mayo.database.hibernate.HibernateUtil.getOneOrNone;
 import static com.mayo.database.hibernate.HibernateUtil.list;
 import static com.mayo.database.hibernate.HibernateUtil.save;
 import static com.mayo.database.hibernate.HibernateUtil.search;
+import static com.mayo.database.hibernate.HibernateUtil.searchOne;
+import static com.mayo.database.hibernate.HibernateUtil.searchOneOrNone;
 import static com.mayo.database.hibernate.HibernateUtil.update;
 
 import java.io.IOException;
@@ -149,23 +154,30 @@ public class MayoService{
 			@Context HttpServletResponse servletResponse) throws ParseException, JsonParseException, JsonMappingException, IOException{
 
 		LOGGER.info("register user  " + mainEmail);
+		
+		// 1. Search for user
 		Long userId = matcher.searchUser(new String[]{mainEmail}, new String[]{});
 		if (userId == null) {
 
-			// User does not exist
-			// Create it
+			// 2. User does not exist. Create it
+			// Save its email
 			Users user = new Users(mainEmail, password, firstName, lastName, sex, birthDate);
 			userId = (Long) save(user);
-			
 			save(new EmailsUsers(userId, mainEmail));
 
-			// Update the links table
+			// 3. Search a connection
+			// that matches the email
 			Long foundConnection = matcher.searchConnection(new String[]{mainEmail}, new String[]{});
-			save(new Links(userId,foundConnection));
-
-			// Add email to queue
-			VerificationMail email = new VerificationMail(mainEmail, userId);
-			emailQueue.offer(email);
+			if (foundConnection != null) {
+				Links link = new Links(userId,foundConnection);
+				save(link);
+			
+				matcher.updateInterests(link);
+			}
+			// 4. Add email to queue
+			emailQueue.offer(new VerificationMail(mainEmail, userId));
+			
+			// Return the id of the user 
 			return Long.toString(userId);
 		} else {
 
@@ -194,44 +206,54 @@ public class MayoService{
 		long currentUserId = matcher.findUser(httpRequest.getCookies(), tokenStore);
 		
 		// 2. Search among phones and emails the connection id
-		// Get the connection id in user coordinates
 		Long connectionId = matcher.searchConnection(emails, phones);
 		if (connectionId == null) {
 
-			// This connection does not exist add it
+			// 2.1 This connection does not exist add it
 			connectionId = (Long) save(new Connections(name));
 			for (String email : emails) 
 				save(new EmailsConnections(connectionId, email));
-
 			for (String phone : phones) 
 				save(new PhonesConnections(connectionId, phone));
 		
-			// The user has not already been 
-			// linked to a connection
+			// 2.2 The user has not already been linked to a connection
 			Long connectionIdUserCoordinates = matcher.searchUser(emails, phones);
-			System.out.println(MayoService.printAll());
-			if (connectionIdUserCoordinates != null) 
-				save(new Links(connectionIdUserCoordinates, connectionId));
+			if (connectionIdUserCoordinates != null) {
+				Links link = new Links(connectionIdUserCoordinates, connectionId);
+				save(link);
+				
+				matcher.updateInterests(link);
+			}
 		}
 
-		// 3. Search if the connection is linked
-		// to a user
-		List<Links> links = search(LINKS_CLASS, Collections.<String,Object>singletonMap(IMayoService.CONNECTION_ID, connectionId));
-		Links link = getOneOrNone(links);
+		// 3. Search if the connection is linked to a user
+		Links link = searchOneOrNone(LINKS_CLASS, Collections.<String,Object>singletonMap(IMayoService.CONNECTION_ID, connectionId));
 		if (link == null || link.getConnectionId() == null) {
 			
-			// No user matches this connections
-			return Long.toString(connectionId);
-		}
+			// 3.1.1 Save the connection with the connection id
+			save(new Interests(currentUserId, null, connectionId));
+			
+		} else {
+			
+			// 3.2.1 Save the one direction interest
+			Map<String, Object> slicers = new HashMap<String,Object>();
+			slicers.put(FROM_USER, currentUserId);
+			slicers.put(TO_USER, link.getUserId());
+			Interests oneDirectionInterest = searchOneOrNone(INTERESTS_CLASS, slicers);
+			if (oneDirectionInterest == null) {
+				oneDirectionInterest = new Interests(currentUserId, link.getUserId(), null);
+				save(oneDirectionInterest);	
+			}
+			
+			// 3.2.2 Try to find the match the interests
+			List<Interests> interests = matcher.findMatch(oneDirectionInterest);
 
-		// Try to find the match the interests
-		List<Interests> interests = matcher.findMatch(currentUserId, link.getConnectionId());
+			// 3.2.3 Send the connections emails
+			sendConnectionEmail(interests);
+
+		}
 		
-		// Send the connections emails
-		sendConnectionEmail(interests);
-		
-		// Return the connection id
-		return Long.toString(connectionId);		
+		return Long.toString(connectionId);
 	}
 	
 	@Path("/updateUserInformation")
@@ -244,32 +266,58 @@ public class MayoService{
 		String[] phones = mapper.readValue(jsonPhones, String[].class);
 		String[] emails = mapper.readValue(jsonEmails, String[].class);
 
+		// 1. Find the current user logged in
 		long currentUserId = matcher.findUser(httpRequest.getCookies(), tokenStore);
 
-		// TODO Search for the mail before inserting
-		// If there is an equivalent mail
-		// check that it is the same
+		// 2. Add all the necessary
+		// CAREFUL we suppose that these are new information
 		for (String email : emails) 
 			save(new EmailsUsers(currentUserId, email));
 
 		for (String phone : phones) 
 			save(new PhonesUsers(currentUserId, phone));
 		
-		// Search among the connections
+		// 3. Search among the connections
 		Long connectionId = matcher.searchConnection(emails, phones);
 		if (connectionId != null) {
 			
-			// 3. Search if the connection is linked
-			// to a user
-			List<Links> links = search(LINKS_CLASS, Collections.<String,Object>singletonMap(IMayoService.CONNECTION_ID, connectionId));
-			Links link = getOneOrNone(links);
-			if (link != null && link.getConnectionId() != null) {
+			// 3.1 Search if the connection is linked to a user
+			Links link = searchOneOrNone(LINKS_CLASS, Collections.<String,Object>singletonMap(CONNECTION_ID, connectionId));
+			if (link == null) {
+				
+				// Link does not exist
+				// Update with the information
+				link = new Links(currentUserId, connectionId);
+				save(link);
+				
+				matcher.updateInterests(link);
+			} else if (link.getUserId() == null) {
+				
+				// Update with the information
+				link.setUserId(currentUserId);
+				update(link);
+				
+				matcher.updateInterests(link);
+			}
+
+			// Check data consistency
+			if (link.getUserId() != currentUserId) 
+				throw new MayoException("Users do not match");
+
+			// Search for the users interested in the connection 
+			List<Interests> interests = search(INTERESTS_CLASS, Collections.<String,Object>singletonMap(TO_USER, link.getUserId()));
+
+			// Upgrade the interests to user ids 
+			for (Interests interest : interests) {
+
 				// Try to find the match the interests
-				List<Interests> interests = matcher.findMatch(currentUserId, link.getConnectionId());
+				List<Interests> otherDirectionInterest = matcher.findMatch(interest);
 
 				// Send the connections emails
-				sendConnectionEmail(interests);
+				sendConnectionEmail(otherDirectionInterest);
 			}
+				
+				
 		}
 	}
 
@@ -287,11 +335,9 @@ public class MayoService{
 			if (!interest.isEmailSent()) {
 				
 				// Find the users
-				List<Users> fromUsers = search(USERS_CLASS, Collections.<String,Object>singletonMap(ID, interest.getFromUser()));
-				Users fromUser = getOne(fromUsers);
+				Users fromUser = searchOne(USERS_CLASS, Collections.<String,Object>singletonMap(ID, interest.getFromUser()));
 				
-				List<Users> toUsers = search(USERS_CLASS, Collections.<String,Object>singletonMap(ID, interest.getFromUser()));
-				Users toUser = getOne(toUsers);
+				Users toUser = searchOne(USERS_CLASS, Collections.<String,Object>singletonMap(ID, interest.getToUser()));
 				
 				// Send the email
 				emailQueue.add(new ConnectionEmail(fromUser, toUser));	
@@ -313,6 +359,11 @@ public class MayoService{
 		}
 		return sb.toString();
 	}
+	
+	public static void print(){
+		System.out.println(printAll());
+	}
+	
 	
 	protected static <T> String printDatabase(T clazz) {
 		StringBuilder sb = new StringBuilder();

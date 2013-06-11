@@ -21,10 +21,11 @@ import com.mayo.IMayoService;
 @Table(name=IMayoService.LINKS)
 public class Links {
 	
-	@Id
+	
 	@Column(name=IMayoService.USER_ID)
 	protected Long userId;
 	
+	@Id
 	@Column(name=IMayoService.CONNECTION_ID)
 	protected Long connectionId;
 	
