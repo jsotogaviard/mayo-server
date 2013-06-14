@@ -5,6 +5,7 @@ import java.util.Arrays;
 import org.junit.Test;
 
 import com.mayo.mail.AMail;
+import com.mayo.mail.ConnectionEmail;
 import com.mayo.mail.VerificationMail;
 
 public class IntegrationTestsWithLN_FB extends AServiceTests {
@@ -29,7 +30,9 @@ public class IntegrationTestsWithLN_FB extends AServiceTests {
 		
 		// Verify emails send
 		validateSentEmail(Arrays.<AMail>asList(new VerificationMail(email),
-				new VerificationMail(email1)
+				new VerificationMail(email1),
+				new ConnectionEmail(email1),
+				new ConnectionEmail(email)
 				));
 	}
 	

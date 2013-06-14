@@ -57,14 +57,14 @@ public class UserMatcher implements IUserMatcher {
 				foundConnections.add(emailsConnection.getId());
 			}
 		}
-		for (String phone : socialIds) {
+		for (String phone : phones) {
 			List<PhonesConnections> phoneConnections = search(PHONES_CONNECTIONS_CLASS, Collections.<String,Object>singletonMap(PHONE, phone));
 			for (PhonesConnections phoneConnection : phoneConnections) {
 				foundConnections.add(phoneConnection.getId());
 			}
 		}
-		for (String phone : phones) {
-			List<SocialIdConnections> socialIdConnections = search(IMayoService.SOCIAL_ID_CONNECTIONS_CLASS, Collections.<String,Object>singletonMap("socialId", phone));
+		for (String socialId : socialIds) {
+			List<SocialIdConnections> socialIdConnections = search(IMayoService.SOCIAL_ID_CONNECTIONS_CLASS, Collections.<String,Object>singletonMap("socialId", socialId));
 			for (SocialIdConnections socialIdConnection : socialIdConnections) {
 				foundConnections.add(socialIdConnection.getId());
 			}

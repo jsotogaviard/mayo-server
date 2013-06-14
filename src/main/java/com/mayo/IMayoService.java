@@ -103,13 +103,16 @@ public interface IMayoService {
 		USERS_CLASS,
 		EMAILS_USERS_CLASS,
 		PHONES_USERS_CLASS,
+		SOCIAL_ID_USERS_CLASS,
 		
 		CONNECTIONS_CLASS,
 		EMAILS_CONNECTIONS_CLASS,
 		PHONES_CONNECTIONS_CLASS,
+		SOCIAL_ID_CONNECTIONS_CLASS,
 		
 		LINKS_CLASS,
 		INTERESTS_CLASS
+		
 	};
 	
 	public static final String AWS_SERVER = "http://ec2-54-214-124-166.us-west-2.compute.amazonaws.com:9090/mayo/rest/mayo/";
