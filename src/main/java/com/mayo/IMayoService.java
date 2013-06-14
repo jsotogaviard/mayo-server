@@ -13,6 +13,8 @@ import com.mayo.database.hibernate.Interests;
 import com.mayo.database.hibernate.Links;
 import com.mayo.database.hibernate.PhonesConnections;
 import com.mayo.database.hibernate.PhonesUsers;
+import com.mayo.database.hibernate.SocialIdConnections;
+import com.mayo.database.hibernate.SocialIdUsers;
 import com.mayo.database.hibernate.Users;
 
 /**
@@ -36,6 +38,10 @@ public interface IMayoService {
 	public static final String EMAILS_USERS = "EmailsUsers";
 	public static final String EMAILS_USERS_ID = EMAILS_USERS.toLowerCase() + _ID;
 	
+	public static final SocialIdUsers SOCIAL_ID_USERS_CLASS = new SocialIdUsers();
+	public static final String SOCIAL_ID_USERS = "SocialIdUsers";
+	public static final String SOCIAL_ID_USERS_ID = SOCIAL_ID_USERS.toLowerCase() + _ID;
+	
 	/** Connection's tables */
 	public static final Connections CONNECTIONS_CLASS = new Connections();
 	public static final String CONNECTIONS = "Connections";
@@ -47,6 +53,10 @@ public interface IMayoService {
 	public static final EmailsConnections EMAILS_CONNECTIONS_CLASS = new EmailsConnections();
 	public static final String EMAILS_CONNECTIONS = "EmailsConnections";
 	public static final String EMAILS_CONNECTIONS_ID = EMAILS_CONNECTIONS.toLowerCase() + _ID;
+	
+	public static final SocialIdConnections SOCIAL_ID_CONNECTIONS_CLASS = new SocialIdConnections();
+	public static final String SOCIAL_ID_CONNECTIONS = "SocialIdConnections";
+	public static final String SOCIAL_ID_CONNECTIONS_ID = SOCIAL_ID_CONNECTIONS.toLowerCase() + _ID;
 	
 	/** Link's tables */
 	public static final Links LINKS_CLASS = new Links();
@@ -66,6 +76,7 @@ public interface IMayoService {
 	
 	public static final String EMAIL = "email";
 	public static final String EMAILS = "emails";
+	public static final String SOCIAL_ID = "socialId";
 	public static final String MAIN_EMAIL = "mainEmail";
 	public static final String NAME = "name";
 	public static final String FIRST_NAME = "firstName";

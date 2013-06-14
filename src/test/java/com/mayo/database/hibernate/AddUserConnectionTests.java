@@ -20,7 +20,7 @@ public class AddUserConnectionTests extends AServiceTests {
 		long userId = registerUser(email, password);
 		HibernateUtil.update(new Users(userId, email ,password, true));
 		String token = login(email, password);
-		long userConnectionId = addUserConnection("rita", new String[]{"050505050"}, new String[]{"rita1@qfs.com"}, token);
+		long userConnectionId = addUserConnection("rita", new String[]{"050505050"}, new String[]{"rita1@qfs.com"}, EMPTY_ARRAY, token);
 		
 		// database
 		validateDatabase(USERS_CLASS, Arrays.asList(new Users(userId, email ,password, true)));
@@ -31,7 +31,7 @@ public class AddUserConnectionTests extends AServiceTests {
 		// Add a connection without having a connection
 		// It fails
 		try {
-			addUserConnection("rita", new String[]{"050505050"}, new String[]{"rita1@qfs.com"}, null);
+			addUserConnection("rita", new String[]{"050505050"}, new String[]{"rita1@qfs.com"}, EMPTY_ARRAY, null);
 			Assert.fail();
 		} catch (Exception ex) {}
 	}

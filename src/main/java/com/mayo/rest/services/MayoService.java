@@ -15,10 +15,12 @@ import static com.mayo.IMayoService.NAME;
 import static com.mayo.IMayoService.PASSWORD;
 import static com.mayo.IMayoService.PHONES;
 import static com.mayo.IMayoService.SEX;
+import static com.mayo.IMayoService.SOCIAL_ID;
 import static com.mayo.IMayoService.TO_USER;
 import static com.mayo.IMayoService.USERS_CLASS;
 import static com.mayo.IMayoService.USER_ID;
 import static com.mayo.database.hibernate.HibernateUtil.getOne;
+import static com.mayo.database.hibernate.HibernateUtil.getOneOrNone;
 import static com.mayo.database.hibernate.HibernateUtil.list;
 import static com.mayo.database.hibernate.HibernateUtil.save;
 import static com.mayo.database.hibernate.HibernateUtil.search;
@@ -65,6 +67,8 @@ import com.mayo.database.hibernate.Interests;
 import com.mayo.database.hibernate.Links;
 import com.mayo.database.hibernate.PhonesConnections;
 import com.mayo.database.hibernate.PhonesUsers;
+import com.mayo.database.hibernate.SocialIdConnections;
+import com.mayo.database.hibernate.SocialIdUsers;
 import com.mayo.database.hibernate.Users;
 import com.mayo.mail.AMail;
 import com.mayo.mail.ConnectionEmail;
@@ -127,15 +131,21 @@ public class MayoService{
 		slicers.put(MAIN_EMAIL, mainEmail);
 		slicers.put(PASSWORD, password);
 		List<Users> existingUsers = search(USERS_CLASS, slicers);
-		Users user = getOne(existingUsers);
-		if(user.isVerified()){
+		Users user = getOneOrNone(existingUsers);
+		if (user == null) {
 			
+			// User not registered
+			throw new MayoException("User has not been registered");
+		} else if(!user.isVerified()){
+			
+			// User not verified
+			throw new MayoException("User is not verified");
+		} else {
+
 			// Return the created token
 			String token = tokenStore.createToken(user.getId());
 			servletResponse.addCookie(new Cookie(MAYO_AUTH_TOKEN, token));
 			
-		} else {
-			throw new MayoException("User is not verified");
 		}
 	}
 	
@@ -156,7 +166,7 @@ public class MayoService{
 		LOGGER.info("register user  " + mainEmail);
 		
 		// 1. Search for user
-		Long userId = matcher.searchUser(new String[]{mainEmail}, new String[]{});
+		Long userId = matcher.searchUser(new String[]{mainEmail}, new String[]{}, new String[]{});
 		if (userId == null) {
 
 			// 2. User does not exist. Create it
@@ -167,7 +177,7 @@ public class MayoService{
 
 			// 3. Search a connection
 			// that matches the email
-			Long foundConnection = matcher.searchConnection(new String[]{mainEmail}, new String[]{});
+			Long foundConnection = matcher.searchConnection(new String[]{mainEmail}, new String[]{}, new String[]{});
 			if (foundConnection != null) {
 				Links link = new Links(userId,foundConnection);
 				save(link);
@@ -196,17 +206,19 @@ public class MayoService{
 			@FormParam(NAME) String name,
 			@FormParam(EMAILS) String jsonEmails,
 			@FormParam(PHONES) String jsonPhones,
+			@FormParam(SOCIAL_ID) String jsonSocial,
 			@Context HttpServletResponse servletResponse) throws ParseException, JsonParseException, JsonMappingException, IOException{
 
 		LOGGER.info("add user  " + name);
 		String[] phones = mapper.readValue(jsonPhones, String[].class);
 		String[] emails = mapper.readValue(jsonEmails, String[].class);
+		String[] socialIds = mapper.readValue(jsonSocial, String[].class);
 
 		// 1. Find the current user logged
 		long currentUserId = matcher.findUser(httpRequest.getCookies(), tokenStore);
 		
 		// 2. Search among phones and emails the connection id
-		Long connectionId = matcher.searchConnection(emails, phones);
+		Long connectionId = matcher.searchConnection(emails, phones, socialIds);
 		if (connectionId == null) {
 
 			// 2.1 This connection does not exist add it
@@ -215,9 +227,11 @@ public class MayoService{
 				save(new EmailsConnections(connectionId, email));
 			for (String phone : phones) 
 				save(new PhonesConnections(connectionId, phone));
+			for (String socialId : socialIds) 
+				save(new SocialIdConnections(connectionId, socialId));
 		
 			// 2.2 The user has not already been linked to a connection
-			Long connectionIdUserCoordinates = matcher.searchUser(emails, phones);
+			Long connectionIdUserCoordinates = matcher.searchUser(emails, phones, socialIds);
 			if (connectionIdUserCoordinates != null) {
 				Links link = new Links(connectionIdUserCoordinates, connectionId);
 				save(link);
@@ -262,9 +276,11 @@ public class MayoService{
 	public void updateUserInformation(
 			@FormParam(EMAILS) String jsonEmails,
 			@FormParam(PHONES) String jsonPhones,
+			@FormParam(SOCIAL_ID) String jsonSocial,
 			@Context HttpServletResponse servletResponse) throws ParseException, JsonParseException, JsonMappingException, IOException{
 		String[] phones = mapper.readValue(jsonPhones, String[].class);
 		String[] emails = mapper.readValue(jsonEmails, String[].class);
+		String[] socialIds = mapper.readValue(jsonSocial, String[].class);
 
 		// 1. Find the current user logged in
 		long currentUserId = matcher.findUser(httpRequest.getCookies(), tokenStore);
@@ -273,12 +289,13 @@ public class MayoService{
 		// CAREFUL we suppose that these are new information
 		for (String email : emails) 
 			save(new EmailsUsers(currentUserId, email));
-
 		for (String phone : phones) 
 			save(new PhonesUsers(currentUserId, phone));
+		for (String socialId : socialIds) 
+			save(new SocialIdUsers(currentUserId, socialId));
 		
 		// 3. Search among the connections
-		Long connectionId = matcher.searchConnection(emails, phones);
+		Long connectionId = matcher.searchConnection(emails, phones, socialIds);
 		if (connectionId != null) {
 			
 			// 3.1 Search if the connection is linked to a user

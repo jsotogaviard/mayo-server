@@ -5,6 +5,7 @@ import static com.mayo.IMayoService.MAIN_EMAIL;
 import static com.mayo.IMayoService.NAME;
 import static com.mayo.IMayoService.PASSWORD;
 import static com.mayo.IMayoService.PHONES;
+import static com.mayo.IMayoService.SOCIAL_ID;
 import static com.mayo.database.hibernate.HibernateUtil.delete;
 import static com.mayo.database.hibernate.HibernateUtil.list;
 
@@ -65,10 +66,16 @@ public class AServiceTests{
 	public static String email = "jso@qfs.com";
 	public static String password = "secret";
 	public static String phone = "050505050";
+	public static String fbId = "456e-fb";
+	public static String lnId = "456e-ln";
 
 	public static String email1 = "jso1@qfs.com";
 	public static String password1 = "secret1";
 	public static String phone1 = "05060606";
+	public static String fbId1 = "556e-fb";
+	public static String lnId1 = "556e-ln";
+	
+	public static String[] EMPTY_ARRAY = new String[]{};
 	
 	/** The mayo server  */
 	public static Server server;
@@ -184,7 +191,7 @@ public class AServiceTests{
 	}
 
 	@SuppressWarnings("unchecked")
-	public long addUserConnection(String name, String[] phonesUser, String[] emailsUser, String token){
+	public long addUserConnection(String name, String[] phonesUser, String[] emailsUser, String[] socialIds , String token){
 		Form f = new Form();
 		f.add(NAME, name);
 		JSONArray phones = new JSONArray();
@@ -193,6 +200,9 @@ public class AServiceTests{
 		JSONArray emails = new JSONArray();
 		emails.addAll(Arrays.asList(emailsUser));
 		f.add(EMAILS, emails);
+		JSONArray socials = new JSONArray();
+		socials.addAll(Arrays.asList(socialIds));
+		f.add(SOCIAL_ID, socials);
 		WebResource webResource = client.resource("http://localhost:9090/rest/mayo/userConnection");
 		Builder builder = webResource.getRequestBuilder();
 		if (token != null) 
@@ -207,7 +217,7 @@ public class AServiceTests{
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void updateUserInformation(String[] phonesUser, String[] emailsUser, String token){
+	public void updateUserInformation(String[] phonesUser, String[] emailsUser, String[] socialIds, String token){
 		Form f = new Form();
 		JSONArray phones = new JSONArray();
 		phones.addAll(Arrays.asList(phonesUser));
@@ -215,6 +225,9 @@ public class AServiceTests{
 		JSONArray emails = new JSONArray();
 		emails.addAll(Arrays.asList(emailsUser));
 		f.add(EMAILS, emails);
+		JSONArray socials = new JSONArray();
+		socials.addAll(Arrays.asList(socialIds));
+		f.add(SOCIAL_ID, socials);
 		WebResource webResource = client.resource("http://localhost:9090/rest/mayo/updateUserInformation");
 		Builder builder = webResource.getRequestBuilder();
 		if (token != null) 

@@ -31,7 +31,7 @@ public class RegistrationTest extends AServiceTests {
 		
 		// Update the email with another email
 		String cookie = login(email, password);
-		updateUserInformation(new String[]{}, new String[]{email1}, cookie);
+		updateUserInformation(new String[]{}, new String[]{email1}, EMPTY_ARRAY, cookie);
 		
 		// Adding user already registered
 		try {

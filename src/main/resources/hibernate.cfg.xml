@@ -38,7 +38,8 @@
  		<mapping class="com.mayo.database.hibernate.PhonesUsers"/>
  		<mapping class="com.mayo.database.hibernate.Links"/>
  		<mapping class="com.mayo.database.hibernate.Interests"/>
- 		
+ 		<mapping class="com.mayo.database.hibernate.SocialIdConnections"/>
+ 		<mapping class="com.mayo.database.hibernate.SocialIdUsers"/>
  		
  		 
     </session-factory>

@@ -16,15 +16,15 @@ public class IntegrationTestsWithPhones extends AServiceTests {
 		long userId = registerUser(email, password);
 		HibernateUtil.update(new Users(userId, email, password, true));
 		String tokenSoto = login(email, password);
-		updateUserInformation(new String[]{phone}, new String[]{}, tokenSoto);
-		addUserConnection("rita", new String[]{phone1}, new String[]{}, tokenSoto);
+		updateUserInformation(new String[]{phone}, new String[]{}, EMPTY_ARRAY, tokenSoto);
+		addUserConnection("rita", new String[]{phone1}, new String[]{}, EMPTY_ARRAY, tokenSoto);
 
 		// Rita adds Jonathan
 		long userId1 = registerUser(email1, password1);
 		HibernateUtil.update(new Users(userId1, email1, password1, true));
 		String tokenRita = login(email1, password1);
-		updateUserInformation(new String[]{phone1}, new String[]{}, tokenRita);
-		addUserConnection("jon", new String[]{phone}, new String[]{}, tokenRita);
+		updateUserInformation(new String[]{phone1}, new String[]{}, EMPTY_ARRAY, tokenRita);
+		addUserConnection("jon", new String[]{phone}, new String[]{}, EMPTY_ARRAY, tokenRita);
 
 		waitSomeTime(1000);
 		

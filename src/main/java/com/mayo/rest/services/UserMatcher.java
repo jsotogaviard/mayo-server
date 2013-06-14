@@ -39,6 +39,8 @@ import com.mayo.database.hibernate.Interests;
 import com.mayo.database.hibernate.Links;
 import com.mayo.database.hibernate.PhonesConnections;
 import com.mayo.database.hibernate.PhonesUsers;
+import com.mayo.database.hibernate.SocialIdConnections;
+import com.mayo.database.hibernate.SocialIdUsers;
 
 /**
  *
@@ -47,7 +49,7 @@ import com.mayo.database.hibernate.PhonesUsers;
 public class UserMatcher implements IUserMatcher {
 
 	@Override
-	public Long searchConnection(String[] emails, String[] phones) {
+	public Long searchConnection(String[] emails, String[] phones, String[] socialIds) {
 		List<Long> foundConnections = new ArrayList<Long>();
 		for (String email : emails) {
 			List<EmailsConnections> emailConnections = search(EMAILS_CONNECTIONS_CLASS, Collections.<String,Object>singletonMap(EMAIL, email));
@@ -55,17 +57,23 @@ public class UserMatcher implements IUserMatcher {
 				foundConnections.add(emailsConnection.getId());
 			}
 		}
-		for (String phone : phones) {
+		for (String phone : socialIds) {
 			List<PhonesConnections> phoneConnections = search(PHONES_CONNECTIONS_CLASS, Collections.<String,Object>singletonMap(PHONE, phone));
 			for (PhonesConnections phoneConnection : phoneConnections) {
 				foundConnections.add(phoneConnection.getId());
+			}
+		}
+		for (String phone : phones) {
+			List<SocialIdConnections> socialIdConnections = search(IMayoService.SOCIAL_ID_CONNECTIONS_CLASS, Collections.<String,Object>singletonMap("socialId", phone));
+			for (SocialIdConnections socialIdConnection : socialIdConnections) {
+				foundConnections.add(socialIdConnection.getId());
 			}
 		}
 		return getOneOrNone(foundConnections);
 	}
 
 	@Override
-	public Long searchUser(String[] emails, String[] phones) {
+	public Long searchUser(String[] emails, String[] phones, String[] socialIds) {
 		List<Long> foundConnections = new ArrayList<Long>();
 		for (String email : emails) {
 			List<EmailsUsers> emailConnections = search(EMAILS_USERS_CLASS, Collections.<String,Object>singletonMap(EMAIL, email));
@@ -77,6 +85,12 @@ public class UserMatcher implements IUserMatcher {
 			List<PhonesUsers> phoneConnections = search(PHONES_USERS_CLASS, Collections.<String,Object>singletonMap(PHONE, phone));
 			for (PhonesUsers phoneConnection : phoneConnections) {
 				foundConnections.add(phoneConnection.getId());
+			}
+		}
+		for (String socialId : socialIds) {
+			List<SocialIdUsers> socialIdUsers = search(IMayoService.SOCIAL_ID_USERS_CLASS, Collections.<String,Object>singletonMap("socialId", socialId));
+			for (SocialIdUsers socialIdUser : socialIdUsers) {
+				foundConnections.add(socialIdUser.getId());
 			}
 		}
 		return getOneOrNone(foundConnections);
@@ -108,7 +122,7 @@ public class UserMatcher implements IUserMatcher {
 		Map<String, Object> slicers = new HashMap<String,Object>();
 		slicers.put(IMayoService.FROM_USER, interest.getToUser());
 		slicers.put(IMayoService.TO_USER, interest.getFromUser());
-		MayoService.printAll();
+		MayoService.print();
 		Interests otherdirectionInterest = searchOneOrNone(IMayoService.INTERESTS_CLASS, slicers);
 		if (otherdirectionInterest != null) {
 			return Arrays.asList(interest, otherdirectionInterest);
@@ -125,7 +139,7 @@ public class UserMatcher implements IUserMatcher {
 			interest.setToUser(link.getUserId());
 			update(interest);
 		}
-		
+
 	}
 
 }

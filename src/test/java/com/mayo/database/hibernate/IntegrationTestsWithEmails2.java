@@ -16,16 +16,16 @@ public class IntegrationTestsWithEmails2 extends AServiceTests {
 		long userId = registerUser(email, password);
 		HibernateUtil.update(new Users(userId, email, password, true));
 		String tokenSoto = login(email, password);
-		updateUserInformation(new String[]{}, new String[]{"jonathan@qfs.com"}, tokenSoto);
-		addUserConnection("rita", new String[]{}, new String[]{"rita@qfs.com"}, tokenSoto);
+		updateUserInformation(new String[]{}, new String[]{"jonathan@qfs.com"}, EMPTY_ARRAY, tokenSoto);
+		addUserConnection("rita", new String[]{}, new String[]{"rita@qfs.com"}, EMPTY_ARRAY, tokenSoto);
 
 		// Rita adds Jonathan
 		long userId1 = registerUser(email1, password1);
 		HibernateUtil.update(new Users(userId1, email1, password1, true));
 		String tokenRita = login(email1, password1);
-		updateUserInformation(new String[]{}, new String[]{"rita@qfs.com"}, tokenRita);
-		addUserConnection("jon", new String[]{}, new String[]{"jonathan@qfs.com"}, tokenRita);
-		addUserConnection("jon", new String[]{}, new String[]{"jonathan@qfs.com"}, tokenRita);
+		updateUserInformation(new String[]{}, new String[]{"rita@qfs.com"}, EMPTY_ARRAY, tokenRita);
+		addUserConnection("jon", new String[]{}, new String[]{"jonathan@qfs.com"}, EMPTY_ARRAY, tokenRita);
+		addUserConnection("jon", new String[]{}, new String[]{"jonathan@qfs.com"}, EMPTY_ARRAY, tokenRita);
 
 		waitSomeTime(1000);
 		

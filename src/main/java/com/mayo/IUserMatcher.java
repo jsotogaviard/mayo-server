@@ -26,9 +26,10 @@ public interface IUserMatcher {
 	 * 
 	 * @param emails the user emails
 	 * @param phones the user phones
+	 * @param socialId 
 	 * @return null or the found user id
 	 */
-	Long searchConnection(String[] emails, String[] phones);
+	Long searchConnection(String[] emails, String[] phones, String[] socialId);
 	
 	/**
 	 * Null corresponds to a no match. Otherwise
@@ -38,7 +39,7 @@ public interface IUserMatcher {
 	 * @param phones the user phones
 	 * @return null or the found user id
 	 */
-	Long searchUser(String[] emails, String[] phones);
+	Long searchUser(String[] emails, String[] phones, String[] socialIds);
 	
 	/**
 	 * Search among the given cookies
